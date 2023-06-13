@@ -39,15 +39,6 @@ FourthBilliard::FourthBilliard()
 	// add initial trajectory
 	addTrajectory(vec2(5, 5), vec3(0.0, 1.0, 0.0));
 
-
-
-	printf("\nUsage: \n");
-	printf("Key 'w':     Camera pan +y \n");
-	printf("Key 'a':     Camera pan -x\n");
-	printf("Key 's':     Camera pan -y\n");
-	printf("Key 'd':     Camera pan +x\n");
-	printf("Scroll up:   Camera zoom in\n");
-	printf("Scroll down: Camera zoom out\n");
 }
 
 
