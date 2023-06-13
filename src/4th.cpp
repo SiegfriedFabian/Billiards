@@ -123,7 +123,7 @@ int main()
 
 #ifdef __APPLE__
 	glViewport(0, 0, SCR_WIDTH*2, SCR_HEIGHT*2);
-#elif
+#else
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 #endif
 

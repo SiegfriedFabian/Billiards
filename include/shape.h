@@ -3,11 +3,11 @@
 #include<iostream>
 #include"myVectors.h"
 // #include<glad/glad.h>
-// #include<vector>
+#include<vector>
 // #include"GLFW/glfw3.h"
 #include "camera.h"
 #include "shaderClass.h"
-// #include <algorithm>
+#include <algorithm>
 
 
 

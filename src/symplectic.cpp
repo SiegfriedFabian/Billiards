@@ -9,6 +9,7 @@
 // read/write states from json(?)
 // colinear test for consecutive vertices
 // done: colorcoding of p0 and p1
+// store relevant data as double
 
 #include"imgui/imgui.h"
 #include"imgui/imgui_impl_glfw.h"
@@ -134,7 +135,7 @@ int main()
 
 #ifdef __APPLE__
 	glViewport(0, 0, SCR_WIDTH*2, SCR_HEIGHT*2);
-#elif
+#else
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 #endif
 
@@ -188,7 +189,7 @@ int main()
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
 		vec2 tmp = mousePosCoord(window, SCR_WIDTH, SCR_HEIGHT, camera);
-		mouseDelta = tmp - mouse;
+		//mouseDelta = tmp - mouse;
 		mouse = tmp;
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
