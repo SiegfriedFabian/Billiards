@@ -101,11 +101,11 @@ void FourthBilliard::drawPolygon(Shader& shaderProgram)
 	polygon.Draw(shaderProgram);
 }
 
-std::vector<vec2> FourthBilliard::getStartPoints()
+std::vector<vec2_d> FourthBilliard::getStartPoints()
 {
-	std::vector<vec2> startingPoints;
+	std::vector<vec2_d> startingPoints;
 	for (auto& traj : trajectories) {
-		startingPoints.push_back(traj.getStartingPoint());
+		startingPoints.push_back(traj.getPos());
 	}
 	return startingPoints;
 }

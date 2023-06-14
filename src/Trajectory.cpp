@@ -2,45 +2,48 @@
 float eps = 10e-5;
 Trajectory::Trajectory() {
 	polygon = new Poly();
+	size = 3.0f;
 }
 
 Trajectory::Trajectory(vec2_d start, Poly* p, vec3 c) {
+	size = 3.0f;	// set size of Trajectory as 3.0 to make it smaller
 	polygon = p;
 	color = c;
-	vertexData_d.push_back(start);
-	vertexData.push_back(start.toFloat());
+	AddVertex(start);
+	//vertexData_d.push_back(start);
+	//vertexData.push_back(start.toFloat());
 }
 
-void Trajectory::Create() {
-	
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+//void Trajectory::Create() {
+//	
+//	glGenVertexArrays(1, &vao);
+//	glBindVertexArray(vao);
+//
+//	glGenBuffers(1, &vbo); // Generate 1 vertex buffer object
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//	// Enable the vertex Attribute arrays
+//	glEnableVertexAttribArray(0);
+//	//glEnableVertexAttribArray(1);
+//	// Map attribute array 0 to the vertex data of the interleaved vbo
+//	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0)); // first two floats are position
+//	// Map attribute array 1 to the color data of the interleaved vbo
+//	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
+//}
 
-	glGenBuffers(1, &vbo); // Generate 1 vertex buffer object
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	// Enable the vertex Attribute arrays
-	glEnableVertexAttribArray(0);
-	//glEnableVertexAttribArray(1);
-	// Map attribute array 0 to the vertex data of the interleaved vbo
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0)); // first two floats are position
-	// Map attribute array 1 to the color data of the interleaved vbo
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
-}
-
-void Trajectory::Draw(Shader& shaderProgram) {
-	if (vertexData.size() > 0) {
-		shaderProgram.setUniform(color, "vertexColor");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, vertexData.size() * 2 * sizeof(float), &vertexData[0], GL_DYNAMIC_DRAW);
-		glBindVertexArray(vao);
-		//glEnable(GL_POINT_SMOOTH);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glPointSize(size);
-		glDrawArrays(GL_POINTS, 0, vertexData.size());
-		//glDisable(GL_POINT_SMOOTH);
-	}
-}
+//void Trajectory::Draw(Shader& shaderProgram) {
+//	if (vertexData.size() > 0) {
+//		shaderProgram.setUniform(color, "vertexColor");
+//		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//		glBufferData(GL_ARRAY_BUFFER, vertexData.size() * 2 * sizeof(float), &vertexData[0], GL_DYNAMIC_DRAW);
+//		glBindVertexArray(vao);
+//		//glEnable(GL_POINT_SMOOTH);
+//		glEnable(GL_BLEND);
+//		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//		glPointSize(size);
+//		glDrawArrays(GL_POINTS, 0, vertexData.size());
+//		//glDisable(GL_POINT_SMOOTH);
+//	}
+//}
 
 void Trajectory::iterate() {
 	vec2_d pos = vertexData_d.back();
@@ -52,8 +55,9 @@ void Trajectory::iterate() {
 	vec2_d direction2 = normalize(tangentVerticesCircle.first - tangentVerticesCircle.second);
 	vec2_d nextPoint =  pos + lineIntersection(pos, direction1, tangentVerticesCircle.second, direction2)[0] * direction1;
 
-	vertexData_d.push_back(nextPoint);
-	vertexData.push_back(nextPoint.toFloat());
+	//vertexData_d.push_back(nextPoint);
+	//vertexData.push_back(nextPoint.toFloat());
+	AddVertex(nextPoint);
 
 	count++;
 }
@@ -70,10 +74,10 @@ void Trajectory::iterate(int batch, int nIter)
 	}
 }
 
-vec2 Trajectory::getStartingPoint()
-{
-	return vertexData[0];
-}
+//vec2 Trajectory::getStartingPoint()
+//{
+//	return vertexData[0];
+//}
 
 void Trajectory::Reset() {
 	vertexData.resize(1);
@@ -87,12 +91,15 @@ void Trajectory::Reset() {
 // I believe this is due to the Bug from InputScalarN
 void Trajectory::Reset(vec2_d v) 
 {
-	std::cout << vertexData_d.size() << std::endl;
-	Reset();
-	vertexData_d[0] = v;
-	vertexData[0] = v.toFloat();
-	std::cout << vertexData_d.size() << std::endl;
-	std::cout << vertexData_d.back().x << std::endl;
+	clear();
+	AddVertex(v);
+	count = 0;
+	//std::cout << vertexData_d.size() << std::endl;
+	//Reset();
+	//vertexData_d[0] = v;
+	//vertexData[0] = v.toFloat();
+	//std::cout << vertexData_d.size() << std::endl;
+	//std::cout << vertexData_d.back().x << std::endl;
 }
 
 vec2_d Trajectory::lineIntersection(const vec2_d& p0, const vec2_d& v0, const vec2_d& p1, const vec2_d& v1) {
@@ -103,26 +110,26 @@ vec2_d Trajectory::lineIntersection(const vec2_d& p0, const vec2_d& v0, const ve
 }
 
 // SHOULD BE DEPRECATED
-int Trajectory::numberOfIntersections(const vec2_d lineDirection, const vec2_d start) {
-	int numberIntersections = 0;
-	//vec2 lineDirection = normalize(line.direction);
-	for (int i = 0; i < polygon->vertexData.size() - 1; i++) {
-		vec2_d directionSide = polygon->vertexData[i + 1] - polygon->vertexData[i];
-		double lengthSide = length(directionSide);
-		directionSide = normalize(directionSide);
-		vec2_d ts = lineIntersection(vec2_d(polygon->vertexData[i]), directionSide, start, lineDirection);
-		//float t = ts.x * lengthSide; // use fomrula 
-		if (abs(ts.x - lengthSide) < eps || abs(ts.x) < eps) {		// if we go through one of the vertices, we are potentially tangent, but only of we never intersect again.	
-			numberIntersections = 1;
-		}
-		else {
-			if (ts.x < lengthSide && ts.x > 0) {
-				return 2;			// if t is between 0 and 1, the line goes through the polygon
-			}
-		}
-	}
-	return numberIntersections;
-}
+//int Trajectory::numberOfIntersections(const vec2_d lineDirection, const vec2_d start) {
+//	int numberIntersections = 0;
+//	//vec2 lineDirection = normalize(line.direction);
+//	for (int i = 0; i < polygon->vertexData.size() - 1; i++) {
+//		vec2_d directionSide = polygon->vertexData[i + 1] - polygon->vertexData[i];
+//		double lengthSide = length(directionSide);
+//		directionSide = normalize(directionSide);
+//		vec2_d ts = lineIntersection(vec2_d(polygon->vertexData[i]), directionSide, start, lineDirection);
+//		//float t = ts.x * lengthSide; // use fomrula 
+//		if (abs(ts.x - lengthSide) < eps || abs(ts.x) < eps) {		// if we go through one of the vertices, we are potentially tangent, but only of we never intersect again.	
+//			numberIntersections = 1;
+//		}
+//		else {
+//			if (ts.x < lengthSide && ts.x > 0) {
+//				return 2;			// if t is between 0 and 1, the line goes through the polygon
+//			}
+//		}
+//	}
+//	return numberIntersections;
+//}
 
 std::pair<int, int> Trajectory::computeTangentVertices(vec2_d pos) {
 	int n = polygon->vertexData.size() - 1; // amount of vertices

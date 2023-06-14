@@ -32,7 +32,7 @@ public:
 	void drawTrajectories(Shader& shaderProgram);
 	void drawPolygon(Shader& shaderProgram);
 
-	std::vector<vec2> getStartPoints();
+	std::vector<vec2_d> getStartPoints();
 
 	void clearPolygon();
 	void resetTrajectories();

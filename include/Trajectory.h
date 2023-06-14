@@ -15,9 +15,9 @@ public:
 	}
 };
 
-struct Trajectory : public shape{
+struct Trajectory : public Points {
 public:
-	float size = 3.0f;	// size of points
+	//float size = 3.0f;	// size of points
 	int count = 0;		// how many vertices we have
 
 	//std::vector<vec2_d>	vertexData_d; // store trajectory as doubles // should not be neccessary anymore, as this variable now exists in shape
@@ -27,19 +27,19 @@ public:
 	Trajectory();
 	Trajectory(vec2_d start, Poly* p, vec3 color);
 
-	void Create();			
-	void Draw(Shader& shaderProgram);	// draw function, similar to points
+	//void Create();			
+	//void Draw(Shader& shaderProgram);	// draw function, similar to points
 	void iterate();						// calculate the next iteration point using 4th billiard rule
 	void iterate(int batch, int nIter);
 
-	vec2 getStartingPoint();
+	//vec2 getStartingPoint();
 
 	void Reset();						// resets the trajectory, only first point remains
 	void Reset(vec2_d v);					// sets new starting point and clears data
 
 private:
 	vec2_d lineIntersection(const vec2_d& p0, const vec2_d& v0, const vec2_d& p1, const vec2_d& v1);
-	int numberOfIntersections(const vec2_d lineDirection, const vec2_d start);  // TODO consider moving this into Polygon class?
+	//int numberOfIntersections(const vec2_d lineDirection, const vec2_d start);  // TODO consider moving this into Polygon class?
 
 	std::pair<int, int> computeTangentVertices(const vec2_d pos);
 
