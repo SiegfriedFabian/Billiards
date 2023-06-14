@@ -1,38 +1,40 @@
 #include "shape.h"
 
-float EPS = 10e-5;
+double EPS = 10e-5;
 const double PI = 3.14159265358979323846;
 
-vec2 mousePosCoord(GLFWwindow *window, float SCR_WIDTH, float SCR_HEIGHT, Camera camera)
+vec2_d mousePosCoord(GLFWwindow *window, double SCR_WIDTH, double SCR_HEIGHT, Camera camera)
 {
 	double pX, pY;
 	glfwGetCursorPos(window, &pX, &pY);
-	float cX = (2.0f * pX / SCR_WIDTH - 1.0f)* (SCR_WIDTH/SCR_HEIGHT) / camera.Zoom;	// flip y axis
-	float cY = (1.0f - 2.0f * pY / SCR_HEIGHT)/ camera.Zoom ;
+	double cX = (2.0f * pX / SCR_WIDTH - 1.0f)* (SCR_WIDTH/SCR_HEIGHT) / camera.Zoom;	// flip y axis
+	double cY = (1.0f - 2.0f * pY / SCR_HEIGHT)/ camera.Zoom ;
 	
-	return vec2(cX + camera.Position.x, cY + camera.Position.y);
+	return vec2_d(cX + camera.Position.x, cY + camera.Position.y);
 }
 
-vec2 lineIntersection(vec2& p0, vec2& v0, vec2& p1, vec2& v1) {
-	vec2 deltaP = p0 - p1;
+vec2_d lineIntersection(vec2_d& p0, vec2_d& v0, vec2_d& p1, vec2_d& v1) {
+	vec2_d deltaP = p0 - p1;
 	if (abs(det(v0, v1)) < EPS) return INFINITY;
-	vec2 t = 1 / (v1.x * v0.y - v0.x * v1.y) * vec2(dot(deltaP, vec2(v1.y, -v1.x)), dot(deltaP, vec2(v0.y, -v0.x)));
+	vec2_d t = 1 / (v1.x * v0.y - v0.x * v1.y) * vec2_d(dot(deltaP, vec2_d(v1.y, -v1.x)), dot(deltaP, vec2_d(v0.y, -v0.x)));
 	return t; // Returns t0 and t1 which both describe the intersecting point p0 + t0*dir0 = p1 + t1*dir1
 }
 
-inline float sdSegment(const vec2 p, const vec2 a, const vec2 b)
+inline double sdSegment(const vec2_d p, const vec2_d a, const vec2_d b)
 {
-	vec2 pa = p - a, ba = b - a;
-	float h = std::clamp(dot(pa, ba) / dot(ba, ba), 0.0f, 1.0f);
+	vec2_d pa = p - a, ba = b - a;
+	double h = std::clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
 	return length(pa - ba * h);
 }
 
-inline float sdSegment(const vec2 p, const Line l)
+inline double sdSegment(const vec2_d p, Line l)
 {
-	vec2 pa = p - l.vertexData[0], ba = l.vertexData[1] - l.vertexData[0];
-	float h = std::clamp(dot(pa, ba) / dot(ba, ba), 0.0f, 1.0f);
+	vec2_d pa = p - l.getVertexData_d(0), ba = l.getVertexData_d(1) - l.getVertexData_d(0);
+	double h = std::clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
 	return length(pa - ba * h);
 }
+
+
 
 // float firstIntersection(Poly &polygon, vec2 p, vec2 dir)
 // {
@@ -70,26 +72,43 @@ void shape::Draw(){}
 
 void shape::updateDirections() 
 {
-		for (int i = 0; i < directions.size(); i++)
+		for (int i = 0; i < directions_d.size(); i++)
 		{
-			directions[i] = vertexData[i + 1] - vertexData[i];
+			directions_d[i] = vertexData_d[i + 1] - vertexData_d[i];
 		}
 }
+vec2 shape::getVertexData(int index)
+{
+        return vertexData[index];
+}
+vec2_d shape::getVertexData_d(int index)
+{
+        return vertexData_d[index];
+}
+void shape::setVertexData(int index, vec2_d p)
+{
+	vertexData_d[index] = p;
+	vertexData[index] = p.toFloat();
+	
+}
+
 void shape::roundData()
- {
-		for (auto& vertex : vertexData) {
-			vertex = round(vertex);
+{
+		for (int i = 0; i < vertexData_d.size(); i++)
+		{
+			vertexData[i] = round(vertexData[i]);
+			vertexData_d[i] = round(vertexData_d[i]);
 		}
 		updateDirections();
 }
 
-int shape::computeClosestIndex(GLFWwindow *window, vec2 mousePos)
+int shape::computeClosestIndex(GLFWwindow *window, vec2_d mousePos)
 {
 		int closest_i = 0;
-		float minDist = INFINITY;
+		double minDist = INFINITY;
 		for (int i = 0; i < vertexData.size(); i = i + 1)
 		{
-			float distToVertex = length(vertexData[i] - mousePos);
+			double distToVertex = length(vertexData_d[i] - mousePos);
 			if (distToVertex < minDist) {
 				minDist = distToVertex;
 				closest_i = i;
@@ -99,21 +118,23 @@ int shape::computeClosestIndex(GLFWwindow *window, vec2 mousePos)
 		return closest_i;
 }
 
-void shape::translateBy(vec2 &deltaPos)
+void shape::translateBy(vec2_d &deltaPos)
 {
-	for(vec2 v : vertexData) v = v + deltaPos;
-	for (auto it = begin (vertexData); it != end (vertexData); ++it) {
-    	*it = *it + deltaPos;
-}
+	for (int i = 0; i < vertexData.size(); i++)
+	{
+		vertexData_d[i] = vertexData_d[i] + deltaPos;
+		vertexData[i] = vertexData[i] + deltaPos.toFloat();
+	}
+	
 }
 
-IndexDistPair shape::computeClosestIndexDistance(GLFWwindow *window, vec2 mousePos)
+IndexDistPair shape::computeClosestIndexDistance(GLFWwindow *window, vec2_d mousePos)
 {
 		int closest_i = 0;
-		float minDist = INFINITY;
+		double minDist = INFINITY;
 		for (int i = 0; i < vertexData.size(); i = i + 1)
 		{
-			float distToVertex = length(vertexData[i] - mousePos);
+			double distToVertex = length(vertexData_d[i] - mousePos);
 			if (distToVertex < minDist) {
 				minDist = distToVertex;
 				closest_i = i;
@@ -124,7 +145,7 @@ IndexDistPair shape::computeClosestIndexDistance(GLFWwindow *window, vec2 mouseP
 }
 
 
-void shape::dragDropTo(GLFWwindow *window, vec2& pos)
+void shape::dragDropTo(GLFWwindow *window, vec2_d& pos)
 { 
 		// Right-Click behaviour
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE) {
@@ -136,8 +157,8 @@ void shape::dragDropTo(GLFWwindow *window, vec2& pos)
 				pickedVertex = true;
 			}
 
-			if (length(vertexData[pickedVertexIndex] - pos) > EPS) {
-				vertexData[pickedVertexIndex] = pos;
+			if (length(vertexData_d[pickedVertexIndex] - pos) > EPS) {
+				vertexData_d[pickedVertexIndex] = pos;
 				vertexChange = true;
 			}
 			updateDirections();
@@ -168,35 +189,40 @@ void Poly::Draw(Shader &shaderProgram, vec3 &col){
 		}
 	}
 
-void Poly::AddVertex(vec2 p) {
-		vertexData.push_back(p);
+void Poly::AddVertex(vec2_d p) {
+		vertexData.push_back(p.toFloat());
+		vertexData_d.push_back(p);
 		int i = vertexData.size() - 1;
-		if (i > 0) directions.push_back(vertexData[i] - vertexData[i - 1]);
+		if (i > 0) {
+			directions_d.push_back(vertexData_d[i] - vertexData_d[i - 1]);
+		}
 	}
 
 
-vec2 Poly::ParamEdgeRatio(float t){
-		float tMod = fmod(t, directions.size());
+vec2_d Poly::ParamEdgeRatio(double t){
+		double tMod = fmod(t, directions_d.size());
 		int edgeIndex = int(tMod);
-		float tlin = t - int(tMod);
-		return tlin * vertexData[edgeIndex + 1] + (1.0f - tlin) * vertexData[edgeIndex];
+		double tlin = t - int(tMod);
+		return tlin * vertexData_d[edgeIndex + 1] + (1.0f - tlin) * vertexData_d[edgeIndex];
 	}
 
 void Poly::ClosePolygon(){
 		if (!closed) {
 			vertexData.push_back(vertexData[0]);
+			vertexData_d.push_back(vertexData_d[0]);
 			// std::cout << "before direction update" << std::endl;
 
-			directions.push_back(vertexData[0] - vertexData[vertexData.size() - 2]);
+			directions_d.push_back(vertexData_d[0] - vertexData_d[vertexData.size() - 2]);
 			closed = true;
 		}
 	}
 void Poly::Clear() {
 		vertexData.clear();
-		directions.clear();
+		vertexData_d.clear();
+		directions_d.clear();
 		closed = false;
 	}
-void Poly::onMouse(GLFWwindow *window, vec2 &mousePos){ // pX, pY are the pixel coordinates of the cursor in the coordinate system of the operation system
+void Poly::onMouse(GLFWwindow *window, vec2_d &mousePos){ // pX, pY are the pixel coordinates of the cursor in the coordinate system of the operation system
 		//int w, h;
 		//glfwGetWindowSize(window, &w, &h);
 
@@ -222,24 +248,26 @@ void Poly::onMouse(GLFWwindow *window, vec2 &mousePos){ // pX, pY are the pixel 
 				pickedVertex = true;
 			}
 
-			if (length(vertexData[pickedVertexIndex] - mousePos) >  EPS) {
-				vertexData[pickedVertexIndex] = mousePos;
+			if (length(vertexData_d[pickedVertexIndex] - mousePos) >  EPS) {
+				vertexData[pickedVertexIndex] = mousePos.toFloat();
+				vertexData_d[pickedVertexIndex] = mousePos;
 				vertexChange = true;
 			}
 
 			if (closed && pickedVertexIndex == 0) {
 				int lastVert = vertexData.size() - 1;
-				vertexData[lastVert] = mousePos;
+				vertexData[lastVert] = mousePos.toFloat();
+				vertexData_d[lastVert] = mousePos;
 			}
 			updateDirections();
 		}
 	}
 
-float Poly::distance(vec2 &p){
-	float dist = INFINITY;
+double Poly::distance(vec2_d &p){
+	double dist = INFINITY;
 	for (int i = 0; i < vertexData.size()-1; i++)
 	{
-		float d = sdSegment(p, vertexData[i], vertexData[i+1]);
+		double d = sdSegment(p, vertexData_d[i], vertexData_d[i+1]);
 		if (d < dist)
 		{
 			dist = d;
@@ -249,12 +277,12 @@ float Poly::distance(vec2 &p){
 	return dist;
 }
 
-int Poly::closestEdge(const vec2 &p){
+int Poly::closestEdge(const vec2_d &p){
 		int minEdge = 0;
-		float minDist = INFINITY;
-		for (int i = 0; i < directions.size(); i++)
+		double minDist = INFINITY;
+		for (int i = 0; i < directions_d.size(); i++)
 		{
-			float currentDist = sdSegment(p, vertexData[i], vertexData[i + 1]);
+			double currentDist = sdSegment(p, vertexData_d[i], vertexData_d[i + 1]);
 			if (currentDist < minDist) {
 				minDist = currentDist;
 				minEdge = i;
@@ -264,85 +292,94 @@ int Poly::closestEdge(const vec2 &p){
 		return minEdge;
 	}
 
-void Poly::makeNStar(int n, float innerRadius, float outerRadius){
+void Poly::makeNStar(int n, double innerRadius, double outerRadius){
     if (n <= 2) return; // if n <= 2 then dont do anything as we cant have a polygon
     this->Clear(); // remove all curent vertices
     for (int i = 0; i < n; i++) {
-        this->AddVertex(vec2(outerRadius * std::cos(2 * PI * i / n ), outerRadius * sin(2 * PI * i / n))); // add new vertices)
-        this->AddVertex(vec2(innerRadius * std::cos(2 * PI * i / n + PI / n), innerRadius * sin(2 * PI * i / n + PI / n))); // add new vertices)
+        this->AddVertex(vec2_d(outerRadius * std::cos(2 * PI * i / n ), outerRadius * sin(2 * PI * i / n))); // add new vertices)
+        this->AddVertex(vec2_d(innerRadius * std::cos(2 * PI * i / n + PI / n), innerRadius * sin(2 * PI * i / n + PI / n))); // add new vertices)
     }
     this->ClosePolygon(); // close the polygon again
 }
 
-void Poly::makeRegularNPoly(int n, float radius){
+void Poly::makeRegularNPoly(int n, double radius){
     if (n <= 2) return; // if n <= 2 then dont do anything as we cant have a polygon
     this->Clear(); // remove all curent vertices
     for (int i = 0; i < n; i++) {
-        this->AddVertex(vec2(radius * std::cos(2 * PI * i / n), radius * sin(2 * PI * i / n))); // add new vertices
+        this->AddVertex(vec2_d(radius * std::cos(2 * PI * i / n), radius * sin(2 * PI * i / n))); // add new vertices
     }
     this->ClosePolygon(); // close the polygon again
 }
 
-void Poly::makeRegularNStar(int n, float radius){
+void Poly::makeRegularNStar(int n, double radius){
 	makeNStar(n, (0.5 * radius)/ cos(PI/(n)), radius);
 }
 
 void Poly::turnIntoQuad()
 {
 	Clear();
-	AddVertex(vec2(0.0,0.0));
-	AddVertex(vec2(4.0,0.0));
-	AddVertex(vec2(1.0,3.0));
-	AddVertex(vec2(0.0,2.0));
+	AddVertex(vec2_d(0.0,0.0));
+	AddVertex(vec2_d(4.0,0.0));
+	AddVertex(vec2_d(1.0,3.0));
+	AddVertex(vec2_d(0.0,2.0));
 	ClosePolygon();
 }
 
-vec2 Poly::computeCenter()
+vec2_d Poly::computeCenter()
 {
-	vec2 avg = vec2(0.,0.);
+	vec2_d avg = vec2_d(0.,0.);
 	if(closed){
 		for (int i = 0; i < vertexData.size()-1; i++)
 		{
-			avg = avg + vertexData[i];
+			avg = avg + vertexData_d[i];
 		}
-    	return (1.0f/(vertexData.size()-1)) * avg;
+    	return (1.0/(vertexData_d.size()-1)) * avg;
 
 	} else {
 		for (int i = 0; i < vertexData.size(); i++)
 		{
-			avg = avg + vertexData[i];
+			avg = avg + vertexData_d[i];
 		}
-    	return (1.0f/vertexData.size()) * avg;
+    	return (1.0/vertexData.size()) * avg;
 	}
 }
 
 void Poly::center()
 {
-	vec2 avg = computeCenter();
-	for (auto it = begin (vertexData); it != end (vertexData); ++it) {
-    	*it = *it - avg;
+	vec2_d avg = computeCenter();
+	for (int i = 0; i < vertexData.size(); i++)
+	{
+		vertexData[i] = vertexData[i] - avg.toFloat();
+		vertexData_d[i] = vertexData_d[i] - avg;
 	}
+	
 }
 
 Line::Line() {
     vertexData.push_back(vec2());
     vertexData.push_back(vec2());
+    vertexData_d.push_back(vec2_d());
+    vertexData_d.push_back(vec2_d());
     updateDirections();
 }
 
-void Line::set(vec2 start, vec2 end) {
-    vertexData[0] = start;
-    vertexData[1] = end;
+void Line::set(vec2_d start, vec2_d end) {
+    vertexData_d[0] = start;
+    vertexData[0] = start.toFloat();
+    vertexData_d[1] = end;
+    vertexData[1] = end.toFloat();
     updateDirections();
 }
 
-void Line::setStart(vec2 start) {
-    vertexData[0] = start;
+void Line::setStart(vec2_d start) {
+    vertexData_d[0] = start;
+    vertexData[0] = start.toFloat();
     updateDirections();
 }
 
-void Line::setEnd(vec2 end){
-    vertexData[1] = end;
+void Line::setEnd(vec2_d end){
+    vertexData_d[1] = end;
+    vertexData[1] = end.toFloat();
     updateDirections();
 }
 
@@ -387,21 +424,28 @@ void Line::round() {
     if (vertexData.size() > 1) {
         for (int i = 0; i < vertexData.size(); i = i + 1)
         {
-            float x_val = vertexData[i].x;
-            vertexData[i].x = floor(x_val+0.5);
-            float y_val = vertexData[i].y;
-            vertexData[i].y = floor(y_val+0.5);
+            double x_val = vertexData_d[i].x;
+			x_val = floor(x_val+0.5);
+            vertexData_d[i].x = x_val;
+            vertexData[i].x = x_val;
+            double y_val = vertexData_d[i].y;
+			y_val = floor(y_val+0.5);
+            vertexData_d[i].y = y_val;
+            vertexData[i].y = y_val;
         }
         updateDirections();
     }
 }
 
 void Line::updateDirections(){
-		if(vertexData.size() > 1) direction = vertexData[1] - vertexData[0];
+		if(vertexData.size() > 1){
+			direction_d = vertexData_d[1] - vertexData_d[0];
+		} 
 	}
 
-void Line::setClosestVertexTo(GLFWwindow *window, vec2 &mouse) {
-		vertexData[computeClosestIndex(window, mouse)] = mouse;
+void Line::setClosestVertexTo(GLFWwindow *window, vec2_d &mouse) {
+		vertexData_d[computeClosestIndex(window, mouse)] = mouse;
+		vertexData[computeClosestIndex(window, mouse)] = mouse.toFloat();
 	}
 
 void Points::Create(){
@@ -450,61 +494,69 @@ void Points::Draw(Shader &shaderProgram, vec3 &col)
 	}
 }
 
-vec2 Points::getPos()
+void Points::AddVertex(vec2_d p)
 {
-	return vertexData[0];
+		vertexData.push_back(p.toFloat());
+		vertexData_d.push_back(p);
+}
+
+vec2_d Points::getPos()
+{
+	return vertexData_d[0];
 }
 
 void Points::clear() {
 		vertexData.clear();
+		vertexData_d.clear();
 	}
 
 void Points::projectOntoPolygon(Poly &polygon){
-		for (auto & pos : vertexData)
+		for (int i = 0; i < vertexData.size(); i++)
 		{
-			int edge = polygon.closestEdge(pos);
-			float l = length(polygon.directions[edge]);
-			vec2 d = normalize(polygon.directions[edge]);
-			pos = std::clamp(dot(pos - polygon.vertexData[edge], d), 0.0f, l) * d + polygon.vertexData[edge];
+			int edge = polygon.closestEdge(vertexData_d[i]);
+			double l = length(polygon.directions_d[edge]);
+			vec2_d d = normalize(polygon.directions_d[edge]);
+			vertexData_d[i] = std::clamp(dot(vertexData_d[i] - polygon.vertexData_d[edge], d), 0.0, l) * d + polygon.vertexData_d[edge];
+			vertexData[i] = vertexData_d[i].toFloat();
 		}
 }
 
-inline vec2 lineIntersection(const vec2& p0, const vec2& v0, const vec2& p1, const vec2& v1) {
+inline vec2_d lineIntersection(const vec2_d& p0, const vec2_d& v0, const vec2_d& p1, const vec2_d& v1) {
 	// Note: v0, v1 have to be normalized
-	vec2 deltaP = p0 - p1;
+	vec2_d deltaP = p0 - p1;
 	if (abs(det(v0, v1)) < EPS) return INFINITY;
-	vec2 t = 1 / (v1.x * v0.y - v0.x * v1.y) * vec2(dot(deltaP, vec2(v1.y, -v1.x)), dot(deltaP, vec2(v0.y, -v0.x)));
+	vec2_d t = 1 / (v1.x * v0.y - v0.x * v1.y) * vec2_d(dot(deltaP, vec2_d(v1.y, -v1.x)), dot(deltaP, vec2_d(v0.y, -v0.x)));
 	return t; // Returns t0 and t1 which both describe the intersecting point p0 + t0*dir0 = p1 + t1*dir1
 }
 
-float firstIntersection(Poly& polygon, vec2 p, vec2 dir) {
-	float minDist = INFINITY;
+double firstIntersection(Poly& polygon, vec2_d p, vec2_d dir) {
+	double minDist = INFINITY;
 	int minIndex = INFINITY;
-	float res = 0;
-	for (int i = 0; i < polygon.directions.size(); i++)
+	double res = 0;
+	for (int i = 0; i < polygon.directions_d.size(); i++)
 	{
-		vec2 t = lineIntersection(p, dir, polygon.vertexData[i], polygon.directions[i]);
+		vec2_d t = lineIntersection(p, dir, polygon.vertexData_d[i], polygon.directions_d[i]);
 		if (0.0001 < t.x && t.x < minDist &&  EPS < t.y && t.y < 0.999) {
 			//std::cout << "At direction " << i << " = (" << directions[i].x << ", " << directions[i].y << "), we have t = " << t.x << ", " << t.y << ", " << length(directions[i]) << std::endl;
 			minDist = t.x;
 			minIndex = i;
-			res = float(i) + t.y;
+			res = double(i) + t.y;
 		}
 	}
 	return res; // Returns the distance from p, i.e. the intersection is at p + minDist*dir
 }
 
-vec2 projectOntoLineClamped(const vec2 &pos, const Line &line)
+vec2_d projectOntoLineClamped(const vec2_d &pos, const Line &line)
 {
-   	float l = length(line.direction);
-	vec2 d = normalize(line.direction);
-	return std::clamp(dot(pos - line.vertexData[0], d), 0.0f, l) * d + line.vertexData[0];
+   	double l = length(line.direction_d);
+	vec2_d d = normalize(line.direction_d);
+	return std::clamp(dot(pos - line.vertexData_d[0], d), 0.0, l) * d + line.vertexData_d[0];
 }
 
-vec2 projectOntoLine(const vec2 &pos, const Line &line)
+vec2_d projectOntoLine(const vec2_d &pos, const Line &line)
 {
-	vec2 d = normalize(line.direction);
-	return dot(pos - line.vertexData[0], d) * d + line.vertexData[0];
+	vec2_d d = normalize(line.direction_d);
+	return dot(pos - line.vertexData_d[0], d) * d + line.vertexData_d[0];
 }
 
 // inline vec2 projectOntoLine(const vec2& pos, const Line& line) {
@@ -513,24 +565,24 @@ vec2 projectOntoLine(const vec2 &pos, const Line &line)
 // 	return std::clamp(dot(pos - line.vertexData[0], d), 0.0f, l) * d + line.vertexData[0];
 // }
 
-vec2 projectOntoPolygon(const vec2& pos, Poly& polygon) {
+vec2_d projectOntoPolygon(const vec2_d& pos, Poly& polygon) {
 	int edge = polygon.closestEdge(pos);
-	float l = length(polygon.directions[edge]);
-	vec2 d = normalize(polygon.directions[edge]);
-	return std::clamp(dot(pos - polygon.vertexData[edge], d), 0.0f, l) * d + polygon.vertexData[edge];
+	double l = length(polygon.directions_d[edge]);
+	vec2_d d = normalize(polygon.directions_d[edge]);
+	return std::clamp(dot(pos - polygon.vertexData_d[edge], d), 0.0, l) * d + polygon.vertexData_d[edge];
 }
 
-float inverseParamPolygon(const vec2 &pos, Poly &polygon)
+double inverseParamPolygon(const vec2_d &pos, Poly &polygon)
 {
     int edge = polygon.closestEdge(pos);
-	float l = length(polygon.directions[edge]);
-	vec2 d = normalize(polygon.directions[edge]);
-	return std::clamp(dot(pos - polygon.vertexData[edge], d), 0.0f, l) / l + float(edge);
+	double l = length(polygon.directions_d[edge]);
+	vec2_d d = normalize(polygon.directions_d[edge]);
+	return std::clamp(dot(pos - polygon.vertexData_d[edge], d), 0.0, l) / l + float(edge);
 }
 
-inline float lineIntersectsSide(const vec2& x, const vec2& y, const Line& line) {
-	vec2 startingPiont = line.vertexData[0];
-	float t = ((startingPiont.y - x.y) * line.direction.x + (startingPiont.x - x.x) * line.direction.y) / (line.direction.x * (y.y - x.y) + (y.x - x.x) * line.direction.y);
+inline float lineIntersectsSide(const vec2_d& x, const vec2_d& y, const Line& line) {
+	vec2_d startingPiont = line.vertexData_d[0];
+	float t = ((startingPiont.y - x.y) * line.direction_d.x + (startingPiont.x - x.x) * line.direction_d.y) / (line.direction_d.x * (y.y - x.y) + (y.x - x.x) * line.direction_d.y);
 	return t;
 }
 
@@ -538,12 +590,12 @@ inline float lineIntersectsSide(const vec2& x, const vec2& y, const Line& line) 
 // stops if the line goes through one of the edges (this only works because since the polygon is convex there can only be two intersections at most)
 inline int numberOfIntersections(const Poly& polygon, const Line& line) {
 	int numberIntersections = 0;
-	vec2 lineDirection = normalize(line.direction);
+	vec2_d lineDirection = normalize(line.direction_d);
 	for (int i = 0; i < polygon.vertexData.size()-1; i++) {
-		vec2 directionSide = polygon.vertexData[i+1] - polygon.vertexData[i];
+		vec2_d directionSide = polygon.vertexData_d[i+1] - polygon.vertexData_d[i];
 		float lengthSide = length(directionSide);
 		directionSide = normalize(directionSide);
-		vec2 ts = lineIntersection(polygon.vertexData[i], directionSide, line.vertexData[0], lineDirection);
+		vec2_d ts = lineIntersection(polygon.vertexData_d[i], directionSide, line.vertexData_d[0], lineDirection);
 		//float t = ts.x * lengthSide; // use fomrula 
 		if (abs(ts.x - lengthSide) < EPS || abs(ts.x) < EPS) {		// if we go through one of the vertices, we are potentially tangent, but only of we never intersect again.	
 			numberIntersections = 1;
@@ -559,12 +611,12 @@ inline int numberOfIntersections(const Poly& polygon, const Line& line) {
 
 // start is the startingpoint for the iteration, p1, p2 are the tangents vertices of the polygon
 // calculates the osculating cirlce for p2
-inline Circle computeOsculatingCircle(vec2 start, vec2 p1, vec2 p2) {
-	vec2 q = length(start-p2) * normalize(start - p1) +  start; // second point where the circle tangents
-	vec2 direction1 = normalize(vec2(-(start - p2).y, (start - p2).x)); // rotate directions
-	vec2 direction2 = normalize(vec2(-(q - start).y, (q - start).x));
-	vec2 intersection = lineIntersection(p2, direction1, q, direction2);
-	vec2 center = p2 + intersection[0] * direction1;
+inline Circle computeOsculatingCircle(vec2_d start, vec2_d p1, vec2_d p2) {
+	vec2_d q = length(start-p2) * normalize(start - p1) +  start; // second point where the circle tangents
+	vec2_d direction1 = normalize(vec2_d(-(start - p2).y, (start - p2).x)); // rotate directions
+	vec2_d direction2 = normalize(vec2_d(-(q - start).y, (q - start).x));
+	vec2_d intersection = lineIntersection(p2, direction1, q, direction2);
+	vec2_d center = p2 + intersection[0] * direction1;
 	float radius = abs(intersection[0]);
 	return Circle(center, radius);
 }
@@ -573,42 +625,42 @@ inline Circle computeOsculatingCircle(vec2 start, vec2 p1, vec2 p2) {
 // TODO there is an error here
 // formula has error, calculates the wrong tangentpoint
 // potenziell die Rotationsmatrix?
-inline vec2 tangentPointCircle(vec2 pt, Circle circle) {
+inline vec2_d tangentPointCircle(vec2_d pt, Circle circle) {
 	// known: pt-center, r as distance to solution, angle at pt between pt-center and pt-solution -> arcsin(r/ |pt-center|)
 	// first idea: compute tangent and project center onto it
-	float angle = float(asin(circle.radius/length(circle.center - pt)));
-	mat2 rotator = mat2(float(cos(angle)), -float(sin(angle)), float(sin(angle)), float(cos(angle))); // rotation matrix
-	vec2 direction = rotator * (circle.center - pt);  // TODO bei der Matrixmult ist ein Fehler! Der rechnet hier falsch
+	double angle = asin(circle.radius/length(circle.center - pt));
+	mat2_d rotator = mat2_d((cos(angle)), - sin(angle), sin(angle), cos(angle)); // rotation matrix
+	vec2_d direction = rotator * (circle.center - pt);  // TODO bei der Matrixmult ist ein Fehler! Der rechnet hier falsch
 	Line l = Line();
 	l.set(pt, pt + direction);
-	vec2 tangentPoint = projectOntoLine(circle.center, l);
+	vec2_d tangentPoint = projectOntoLine(circle.center, l);
 	return tangentPoint;
 }
 
 
 // for each point of the polygon calculate the tangent to the circle and check, how many intersection this line has with the polygon
 // first point in tuple is from polygon, second is on the circle
-inline std::tuple<vec2, vec2> tangentPolyCircle(const int& startVertex, const Poly& polygon, const Circle& circle) {
+inline std::tuple<vec2_d, vec2_d> tangentPolyCircle(const int& startVertex, const Poly& polygon, const Circle& circle) {
 	int n = polygon.vertexData.size() - 1; // number of vertizes in polygon
 	for (int i = startVertex; i < n + startVertex; i++) {
-		vec2 tangentPoint = tangentPointCircle(polygon.vertexData[i%n], circle); // get potential tangent point on the circle TODO this can aparently be NAN!!! BUT IT STILL WORKS?!?!? Dont worry, it happens only with the already tangent point. that is ok. should not happen :)
+		vec2_d tangentPoint = tangentPointCircle(polygon.vertexData_d[i%n], circle); // get potential tangent point on the circle TODO this can aparently be NAN!!! BUT IT STILL WORKS?!?!? Dont worry, it happens only with the already tangent point. that is ok. should not happen :)
 		Line l = Line();
-		l.set(tangentPoint, polygon.vertexData[i%n]);
+		l.set(tangentPoint, polygon.vertexData_d[i%n]);
 		if (numberOfIntersections(polygon, l) == 1) {
-			return std::make_tuple(polygon.vertexData[i % n], tangentPoint);
+			return std::make_tuple(polygon.vertexData_d[i % n], tangentPoint);
 		}
 	}
-	return std::make_tuple(vec2(), vec2()); // if it reaches here, we have a problem
+	return std::make_tuple(vec2_d(), vec2_d()); // if it reaches here, we have a problem
 }
 
 // for each vertex of the polygon, create a line with pos and find out how many intersections with the polygon this line has.
 // if there is only 1, it is tangent
 // the return value has to be the index of the vertices for firther calculations
-inline std::tuple<int, int> computeTangentVertices(const vec2& pos, const Poly& polygon) {
+inline std::tuple<int, int> computeTangentVertices(const vec2_d& pos, const Poly& polygon) {
 	std::vector<int> tangentVertices;
 	for (int i = 0; i < polygon.vertexData.size()-1; i++) {
 		Line l = Line(); 
-		l.set(pos, polygon.vertexData[i]);
+		l.set(pos, polygon.vertexData_d[i]);
 		int intersections = numberOfIntersections(polygon, l);
 		if (intersections == 1) tangentVertices.push_back(i); // hier muss was gemacht werden
 	}
@@ -617,27 +669,27 @@ inline std::tuple<int, int> computeTangentVertices(const vec2& pos, const Poly& 
 		return std::make_tuple(0, 1);
 	}
 
-	if (det(polygon.vertexData[tangentVertices[0]] - pos, polygon.vertexData[tangentVertices[tangentVertices.size() - 1]] - pos) > 0.0f) {
+	if (det(polygon.vertexData_d[tangentVertices[0]] - pos, polygon.vertexData_d[tangentVertices[tangentVertices.size() - 1]] - pos) > 0.0f) {
 		return std::make_tuple(tangentVertices[tangentVertices.size() - 1], tangentVertices[0]); // if tangentVertices does not have size 2, we have a problem TODO
 	}
 	return std::make_tuple(tangentVertices[0], tangentVertices[tangentVertices.size() - 1]); // if tangentVertices does not have size 2, we have a problem TODO
 }
 
 // find the tangent vertices, by finding the 2 vertices, that give the largest angle
-inline std::tuple<int, int> computeTangentVerticesAlt(const vec2& pos, const Poly& polygon) {
+inline std::tuple<int, int> computeTangentVerticesAlt(const vec2_d& pos, const Poly& polygon) {
 	int n = polygon.vertexData.size() - 1; // amount of vertices
 	float currentLargestAngle = 100;
 	std::pair<int, int> currentBestVertices = std::make_pair(0, 1);
 	for (int i = 0; i < n; ++i) {
 		for (int j = i + 1; j < n; ++j) {
-			float angle = dot(polygon.vertexData[i] - pos, polygon.vertexData[j] - pos)/(length(polygon.vertexData[i] - pos) * length(polygon.vertexData[j] - pos));
+			float angle = dot(polygon.vertexData_d[i] - pos, polygon.vertexData_d[j] - pos)/(length(polygon.vertexData_d[i] - pos) * length(polygon.vertexData_d[j] - pos));
 			if (angle < currentLargestAngle) { // Yes, < is correct here, since angle is actually cos(angle) and cos is monoton decreasing
 				currentLargestAngle = angle;
 				currentBestVertices = std::make_pair(i, j); 
 			}
 		}
 	}
-	if (det(polygon.vertexData[currentBestVertices.first] - pos, polygon.vertexData[currentBestVertices.second] - pos) > 0.0f) {
+	if (det(polygon.vertexData_d[currentBestVertices.first] - pos, polygon.vertexData_d[currentBestVertices.second] - pos) > 0.0f) {
 		return std::make_tuple(currentBestVertices.second, currentBestVertices.first); // if tangentVertices does not have size 2, we have a problem TODO
 	}
 	return std::make_tuple(currentBestVertices.first, currentBestVertices.second);
@@ -645,12 +697,12 @@ inline std::tuple<int, int> computeTangentVerticesAlt(const vec2& pos, const Pol
 }
 
 
-inline vec2 fourthBilliard(const Poly& polygon, const vec2& p) {
+inline vec2_d fourthBilliard(const Poly& polygon, const vec2_d& p) {
 	auto tangentVertices = computeTangentVerticesAlt(p, polygon);
-	Circle circle = computeOsculatingCircle(p, polygon.vertexData[std::get<0>(tangentVertices)], polygon.vertexData[std::get<1>(tangentVertices)]);
+	Circle circle = computeOsculatingCircle(p, polygon.vertexData_d[std::get<0>(tangentVertices)], polygon.vertexData_d[std::get<1>(tangentVertices)]);
 	auto tangentVerticesCircle = tangentPolyCircle(std::get<1>(tangentVertices) + 1, polygon, circle);	// call with +1, since we dont need to check current point but next point
-	vec2 direction1 = normalize(polygon.vertexData[std::get<1>(tangentVertices)] - p); // direction from starting point to new point
-	vec2 direction2 = normalize(std::get<0>(tangentVerticesCircle) - std::get<1>(tangentVerticesCircle));
+	vec2_d direction1 = normalize(polygon.vertexData_d[std::get<1>(tangentVertices)] - p); // direction from starting point to new point
+	vec2_d direction2 = normalize(std::get<0>(tangentVerticesCircle) - std::get<1>(tangentVerticesCircle));
 	return p + lineIntersection(p, direction1, std::get<1>(tangentVerticesCircle), direction2)[0] * direction1;
 	//return p + vec2(0.1, 0.1);
 }

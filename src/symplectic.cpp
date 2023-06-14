@@ -24,8 +24,8 @@
 
 // settings
 
-float t_0 = 0.5;
-float t_1 = 1.2478926389764982736;
+double t_0 = 0.5;
+double t_1 = 1.2478926389764982736;
 SymplecticBilliardSystem billiard(t_0,  t_1);
 
 
@@ -34,8 +34,8 @@ Line	xAxis;
 Line	yAxis;
 Line	ruler;
 
-vec2 mouse;
-vec2 mouseDelta;
+vec2_d mouse;
+
 
 int nRegular0 = 0;
 int nRegular1 = 0;
@@ -91,7 +91,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main();
 
-void editScene(GLFWwindow *window, vec2 mouse, int code);
+void editScene(GLFWwindow *window, vec2_d mouse, int code);
 
 void HelpMarker(const char* desc);
 
@@ -188,9 +188,8 @@ int main()
 
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
-		vec2 tmp = mousePosCoord(window, SCR_WIDTH, SCR_HEIGHT, camera);
-		//mouseDelta = tmp - mouse;
-		mouse = tmp;
+		mouse = mousePosCoord(window, SCR_WIDTH, SCR_HEIGHT, camera);
+
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -297,11 +296,11 @@ int main()
 			// Slider that appears in the window
 			// ImGui::InputFloat("x0", &tInit.x, 0.001f, polygon.directions.size(), "%.6f");
 			// ImGui::InputFloat("x1", &tInit.y, 0.001f, polygon.directions.size(), "%.6f");
-			ImGui::SliderFloat("t0", &billiard.t0, 0.001f, billiard.polygon0.directions.size());
-			ImGui::SliderFloat("t1", &billiard.t1, 0.001f, billiard.polygon1.directions.size());
+			ImGui::InputDouble("t0", &billiard.t0, 0.001f, billiard.polygon0.directions_d.size());
+			// ImGui::SliderFloat("t1", &billiard.t1, 0.001f, billiard.polygon1.directions_d.size());
 			ImGui::InputInt("Number of iterations", &nIter, 1);
 			ImGui::InputInt("Batch", &batch, 1);
-			for (int i = 0; i < billiard.polygon1.directions.size(); i++)
+			for (int i = 0; i < billiard.polygon1.directions_d.size(); i++)
 			{
 				ImGui::InputFloat2(("Vertex #"+std::to_string(i)).c_str(), &billiard.polygon1.vertexData[i].x);
 			}
@@ -343,10 +342,7 @@ int main()
 		// ------------------------- Reset trajectories if scene changed ---------------------------------------
 		// All the edits happen using either the left (ImGui) or the right (all dragdrop functions) or the ENTER-key. 
 		// So, since this changes the scene, we simly reset every time this happens.
-		if(	glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS || 
-			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS || 
-			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
-			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {billiard.reset();}
+
 
 		grid.Draw(shaderProgram);
 		ruler.Draw(shaderProgram);
@@ -356,6 +352,12 @@ int main()
 		billiard.drawTrajectories(shaderProgram);
 		billiard.drawInitialValues(shaderProgram);
 		editScene(window, mouse, code);
+
+		if(	glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS || 
+			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS || 
+			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
+			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {billiard.reset();}
+
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
@@ -439,7 +441,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 }
 
-void editScene(GLFWwindow* window, vec2 mouse, int code){
+void editScene(GLFWwindow* window, vec2_d mouse, int code){
 // Note: it is important that all the edits of the polygons or the initial values have
 // to happen using the billiard class since only there we update the scene_has_changed variable
 		switch (code) 

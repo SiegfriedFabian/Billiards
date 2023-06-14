@@ -303,14 +303,6 @@ int main()
 
 
 		// ------------------------- Reset trajectories if scene changed ---------------------------------------
-		// All the edits happen using either the left (ImGui) or the right (all dragdrop functions) or the ENTER-key. 
-		// So, since this changes the scene, we simly reset every time this happens.
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS ||
-			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ||
-			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
-			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
-			// billiard.reset(); TODO
-		}
 
 		grid.Draw(shaderProgram);
 		ruler.Draw(shaderProgram);
@@ -321,6 +313,14 @@ int main()
 
 		editScene(window, mouse, billiard.mode, billiard);
 
+		// All the edits happen using either the left (ImGui) or the right (all dragdrop functions) or the ENTER-key. 
+		// So, since this changes the scene, we simly reset every time this happens.
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS ||
+			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ||
+			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
+			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+			// billiard.reset(); TODO
+		}
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events

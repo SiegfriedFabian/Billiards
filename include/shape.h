@@ -11,14 +11,14 @@
 
 
 
-vec2 mousePosCoord(GLFWwindow* window, float SCR_WIDTH, float SCR_HEIGHT, Camera camera);
+vec2_d mousePosCoord(GLFWwindow* window, double SCR_WIDTH, double SCR_HEIGHT, Camera camera);
 
 struct Circle {
 public:
-	vec2 center;
-	float radius;
+	vec2_d center;
+	double radius;
 
-	Circle(vec2 c = vec2(), float r = 0) {
+	Circle(vec2_d c = vec2_d(), double r = 0) {
 		center = c;
 		radius = r;
 	}
@@ -27,21 +27,23 @@ public:
 
 struct IndexDistPair {
 	int index;
-	float dist;
+	double dist;
 };
 
-IndexDistPair computeClosestIndex(const std::vector<vec2>& vertices, const vec2& pos);
+IndexDistPair computeClosestIndex(const std::vector<vec2_d>& vertices, const vec2_d & pos);
 
 
 // Distance of p to a line segment a---b
-float sdSegment(const vec2 p, const vec2 a, const vec2 b);
+double sdSegment(const vec2_d p, const vec2_d a, const vec2_d b);
 
 // Shape is a class of basic methods and variables from which we will derive the classes point, line and polygon
 struct shape {
+
 public:
-	unsigned int		vao, vbo;						// addresses to allocate buffers for openGL
 	std::vector<vec2>	vertexData;						// Contains the 2D points of the Objects
-	std::vector<vec2>	directions;						// Contains the 2D points of the Objects
+	std::vector<vec2_d>	vertexData_d;						// Contains the 2D points of the Objects
+	std::vector<vec2_d>	directions_d;						// Contains the 2D points of the Objects
+	unsigned int		vao, vbo;						// addresses to allocate buffers for openGL
 	bool				firstClickLeft = true;			// Variable to keep Track if left-mouse has already picked a closest vertex
 	bool				firstClickRight = true;			// Variable to keep Track if right-mouse has already picked a closest vertex
 	vec3				color;						// color of the shape 
@@ -56,26 +58,33 @@ public:
 
 	virtual void updateDirections();
 
+	vec2 getVertexData(int index);
+	vec2_d getVertexData_d(int index);
+	vec2_d getDirection(int index);
+
+	void setVertexData(int index, vec2_d p);
+	
+
 	void roundData();
 
-	void translateBy(vec2& deltaPos);
+	void translateBy(vec2_d& deltaPos);
 
-	int computeClosestIndex(GLFWwindow* window, vec2 mousePos);
-	IndexDistPair computeClosestIndexDistance(GLFWwindow *window, vec2 mousePos);
+	int computeClosestIndex(GLFWwindow* window, vec2_d mousePos);
+	IndexDistPair computeClosestIndexDistance(GLFWwindow *window, vec2_d mousePos);
 
 	// Mouse click event
-	void dragDropTo(GLFWwindow* window, vec2& pos);
+	void dragDropTo(GLFWwindow* window, vec2_d& pos);
 };
 
-struct Poly:public shape {
+struct Poly: public shape {
 public:
 	bool				closed = false;
 
 	void Draw(Shader& shaderProgram);
 	void Draw(Shader &shaderProgram, vec3 &col);
 
-	void AddVertex(vec2 p);
-	vec2 ParamEdgeRatio(float t);
+	void AddVertex(vec2_d p);
+	vec2_d ParamEdgeRatio(double t);
 
 	void ClosePolygon();
 
@@ -83,34 +92,34 @@ public:
 
 
 	// Mouse click event
-	void onMouse(GLFWwindow* window, vec2& mousePos);
+	void onMouse(GLFWwindow* window, vec2_d & mousePos);
 
-	float distance(vec2  &p);
+	double distance(vec2_d  &p);
 
-	int closestEdge(const vec2& p);
+	int closestEdge(const vec2_d & p);
 
 		// turn current Polygon into Regular n-polygon around 0,0 with radius 1
-	void makeRegularNPoly(int n, float radius = 1.0f);
-	void makeNStar(int n, float innerRadius = 1.0f, float outerRadius = 2.0f);
-	void makeRegularNStar(int n, float radius = 1.0f);
+	void makeRegularNPoly(int n, double radius = 1.0f);
+	void makeNStar(int n, double innerRadius = 1.0f, double outerRadius = 2.0f);
+	void makeRegularNStar(int n, double radius = 1.0f);
 	void turnIntoQuad();
-	vec2 computeCenter();
+	vec2_d computeCenter();
 	void center();
-	void scaleBy(float scaleFactor);
+	void scaleBy(double scaleFactor);
 };
 
 
 struct Line:public shape {
 public:
-	vec2				direction = vec2();
+	vec2_d				direction_d = vec2_d();
 	bool				drawLine = true;
 
 	Line();
-	void set(vec2 start, vec2 end);
+	void set(vec2_d start, vec2_d end);
 
-	void setStart(vec2 start);
+	void setStart(vec2_d start);
 
-	void setEnd(vec2 end);
+	void setEnd(vec2_d end);
 
 	void Create();
 
@@ -121,7 +130,7 @@ public:
 	
 	void updateDirections();
 
-	void setClosestVertexTo(GLFWwindow* window, vec2 & mouse);
+	void setClosestVertexTo(GLFWwindow* window, vec2_d & mouse);
 
 };
 
@@ -129,12 +138,14 @@ struct Points : public shape{
 
 	float	size = 10.0f;
 
-	vec2 getPos();
+	vec2_d getPos();
 
 	void Create();
 
 	void Draw(Shader& shaderProgram);
 	void Draw(Shader &shaderProgram, vec3 &col);
+	
+	void AddVertex(vec2_d p);
 
 	void clear();
 
@@ -142,10 +153,10 @@ struct Points : public shape{
 
 };
 
-vec2 lineIntersection(vec2& p0, vec2& v0, vec2& p1, vec2& v1);
-float firstIntersection(Poly& polygon, vec2 p, vec2 dir);
-vec2 projectOntoLine(const vec2& pos, const Line& line);
-vec2 projectOntoPolygon(const vec2& pos, Poly& polygon);
-float inverseParamPolygon(const vec2& pos, Poly& polygon);
+vec2_d lineIntersection(vec2_d & p0, vec2_d & v0, vec2_d & p1, vec2_d & v1);
+double firstIntersection(Poly& polygon, vec2_d p, vec2_d dir);
+vec2_d projectOntoLine(const vec2_d & pos, const Line& line);
+vec2_d projectOntoPolygon(const vec2_d & pos, Poly& polygon);
+double inverseParamPolygon(const vec2_d & pos, Poly& polygon);
 
 #endif
