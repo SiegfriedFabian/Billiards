@@ -259,10 +259,10 @@ int main()
 			for (size_t i = 0; i < billiard.trajectories.size(); i++)
 			{
 				ImGui::InputScalarN("Starting point:", ImGuiDataType_Float, &billiard.trajectories[i].vertexData[0].x, 2, NULL, NULL, "%.6f");
-				// TODO consider using button here "apply changes" like this. That way, no tracking of changes of first iteration neccessary and now jumping of trajectory while getting input
+				// TODO  DONE consider using button here "apply changes" like this. That way, no tracking of changes of first iteration neccessary and now jumping of trajectory while getting input
 				ImGui::SameLine();
 				if (ImGui::Button("Apply changes")) {
-					billiard.resetTrajectory(i); // WHY DOES THIS NOT WORK?!?!? Maybe because InputScalarN is still bugged?
+					billiard.resetTrajectory(i);
 				}
 			}
 			ImGui::InputScalarN("Starting point:", ImGuiDataType_Float, &newInit.x, 2, NULL, NULL, "%.6f");
@@ -271,7 +271,7 @@ int main()
 			// all InputScalarN change get the same number when one is changed! I don't understand why? even changing to InputFloat2 does not change it
 			// also they are very hard to click. Consider rendering this last
 			// std::cout << &newInit.x << std::endl;
-			// std::cout << &billiard.trajectories[0].vertexData[0].x << std::endl;
+			std::cout << &billiard.trajectories[0].vertexData[0].x << std::endl;
 			ImGui::SameLine();
 			if (ImGui::Button("Add trajectory")) {
 				billiard.addTrajectory(newInit, vec3(1.,0.,1.));
