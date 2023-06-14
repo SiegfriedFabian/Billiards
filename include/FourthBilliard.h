@@ -37,6 +37,8 @@ public:
 	void clearPolygon();
 	void resetTrajectories();
 
+	void resetTrajectory(int i);
+
 	// make polygon regular by calling the function from Polygon class
 	void makeRegularNPoly(int n);
 };

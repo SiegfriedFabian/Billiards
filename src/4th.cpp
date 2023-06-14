@@ -150,7 +150,7 @@ int main()
 	//---------------------------------------- BEGIN Control Variables ----------------------------------------//
 	//---------------------------------------------------------------------------------------------------------//
 
-	int nRegular = 0;
+	int nRegular = 3; // variable to define how many edges the regular Polygon should have
 	bool drawscreen = true;
 	bool show_grid = 1;
 	bool snapToGrid = false;
@@ -164,7 +164,7 @@ int main()
 	//double rawMouseX, rawMouseY;
 
 	//---------------------------------------- Billiard controls ----------------------------------------------//
-	int batch = 10;
+	int batch = 100;
 	int nIter = 100000;
 	FourthBilliard billiard;
 	vec2 newInit = vec2();
@@ -230,7 +230,7 @@ int main()
 			ImGui::Checkbox("Snap to ruler", &snapToRuler);
 			ImGui::Checkbox("Clear polygon0", &clearPolygon);
 
-			ImGui::InputInt("Edges of Polygon", &nRegular, 2);
+			ImGui::InputInt("Edges of Polygon", &nRegular, 1);
 			if (ImGui::Button("Make polygon regular")) {
 				billiard.makeRegularNPoly(nRegular);											/// make regular in billiards //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			}
@@ -238,10 +238,12 @@ int main()
 			ImGui::InputInt("Batch", &batch, 1);
 			ImGui::Text("Drag and drop whole objects (right-mouse or  two-finger press for Mac):");
 			ImGui::RadioButton("Ruler", &billiard.mode, -1);
-			ImGui::RadioButton("Polygon", &billiard.mode, 0); ImGui::SameLine();                 /////// mode inside billiards ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			ImGui::RadioButton("Polygon", &billiard.mode, 0);									/////// mode inside billiards ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			for (int i = 0; i < billiard.trajectories.size(); i++)
 			{
-			 	ImGui::RadioButton(("change #" + std::to_string(i)).c_str(), &billiard.mode, i + 1);
+				// TODO maybe move these Buttons to the initial values of the trajectories, Otherwise if there are many trajectories, the Buttons "leave" the ImGUI Window
+				ImGui::SameLine();
+			 	ImGui::RadioButton(("change #" + std::to_string(i)).c_str(), &billiard.mode, i + 1); 
 			}
 			ImGui::Text("Drag and drop vertices of objects (right-mouse or two-finger press for Mac):");
 
@@ -257,8 +259,19 @@ int main()
 			for (size_t i = 0; i < billiard.trajectories.size(); i++)
 			{
 				ImGui::InputScalarN("Starting point:", ImGuiDataType_Float, &billiard.trajectories[i].vertexData[0].x, 2, NULL, NULL, "%.6f");
+				// TODO consider using button here "apply changes" like this. That way, no tracking of changes of first iteration neccessary and now jumping of trajectory while getting input
+				ImGui::SameLine();
+				if (ImGui::Button("Apply changes")) {
+					billiard.resetTrajectory(i); // WHY DOES THIS NOT WORK?!?!? Maybe because InputScalarN is still bugged?
+				}
 			}
 			ImGui::InputScalarN("Starting point:", ImGuiDataType_Float, &newInit.x, 2, NULL, NULL, "%.6f");
+			//////////// TODO //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// very big bug!
+			// all InputScalarN change get the same number when one is changed! I don't understand why? even changing to InputFloat2 does not change it
+			// also they are very hard to click. Consider rendering this last
+			// std::cout << &newInit.x << std::endl;
+			// std::cout << &billiard.trajectories[0].vertexData[0].x << std::endl;
 			ImGui::SameLine();
 			if (ImGui::Button("Add trajectory")) {
 				billiard.addTrajectory(newInit, vec3(1.,0.,1.));
@@ -402,13 +415,14 @@ void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard billia
 	// Note: it is important that all the edits of the polygons or the initial values have
 	// to happen using the billiard class since only there we update the scene_has_changed variable
 	
-	// TODO add "thickness" variable to trajectories 
+	// TODO add "thickness" variable to trajectories.
+
 	if (code == -1) {
 		ruler.lineWidth = 5.0;
 		ruler.dragDropTo(window, mouse);
 	}
 	else {
-		billiard.updateCoords(mouse, window);
+		billiard.updateCoords(mouse, window); // TODO, WHY DOES THIS NOT WORK??? I think there might be an error with Reset(vec2 v)
 	}
 
 }

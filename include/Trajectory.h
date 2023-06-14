@@ -20,7 +20,7 @@ public:
 	float size = 3.0f;	// size of points
 	int count = 0;		// how many vertices we have
 
-	std::vector<vec2_d>	vertexData_d; // store trajectory as doubles
+	//std::vector<vec2_d>	vertexData_d; // store trajectory as doubles // should not be neccessary anymore, as this variable now exists in shape
 
 	Poly* polygon; // pointer to polygon on which to reflect TODO: consider smartpointers
 

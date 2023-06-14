@@ -125,6 +125,12 @@ void FourthBilliard::resetTrajectories()
 	}
 }
 
+void FourthBilliard::resetTrajectory(int i)
+{
+	if (i < 0 || i > trajectories.size()) { return; } // check if i is valid index of trajectory. 
+	trajectories[i].Reset();
+}
+
 void FourthBilliard::makeRegularNPoly(int n)
 {
 	this->polygon.makeRegularNPoly(n);

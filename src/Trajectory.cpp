@@ -78,14 +78,21 @@ vec2 Trajectory::getStartingPoint()
 void Trajectory::Reset() {
 	vertexData.resize(1);
 	vertexData_d.resize(1);
+	vertexData_d[0] = vec2_d(vertexData[0]); // manually set vertexData_d, as vertexDat[0] can be changed from main function
 	count = 0;
 }
 
-void Trajectory::Reset(vec2_d v)
+// TODO 
+// this function does not work currently for some weird reason, it does everything it should but there is no effect.
+// I believe this is due to the Bug from InputScalarN
+void Trajectory::Reset(vec2_d v) 
 {
+	std::cout << vertexData_d.size() << std::endl;
 	Reset();
 	vertexData_d[0] = v;
 	vertexData[0] = v.toFloat();
+	std::cout << vertexData_d.size() << std::endl;
+	std::cout << vertexData_d.back().x << std::endl;
 }
 
 vec2_d Trajectory::lineIntersection(const vec2_d& p0, const vec2_d& v0, const vec2_d& p1, const vec2_d& v1) {
