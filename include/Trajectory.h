@@ -35,7 +35,7 @@ public:
 	vec2 getStartingPoint();
 
 	void Reset();						// resets the trajectory, only first point remains
-	void Reset(vec2 v);					// sets new starting point and clears data
+	void Reset(vec2_d v);					// sets new starting point and clears data
 
 private:
 	vec2_d lineIntersection(const vec2_d& p0, const vec2_d& v0, const vec2_d& p1, const vec2_d& v1);

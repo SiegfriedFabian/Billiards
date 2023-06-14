@@ -23,7 +23,7 @@ public:
 	void iterate(int batch, int nIter);
 
 	// change current starting points and polygon dependant on mode and mouse position
-	void updateCoords(vec2 mouse, GLFWwindow* window);
+	void updateCoords(vec2_d mouse, GLFWwindow* window);
 
 	bool polygonClosed();
 

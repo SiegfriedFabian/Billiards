@@ -34,7 +34,7 @@ Line	xAxis;
 Line	yAxis;
 Line	ruler;
 
-vec2 mouse;
+vec2_d mouse;
 
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
@@ -86,7 +86,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main();
 
-void editScene(GLFWwindow* window, vec2 mouse, int code, FourthBilliard billiard);
+void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard billiard);
 
 void HelpMarker(const char* desc);
 
@@ -264,7 +264,7 @@ int main()
 				billiard.addTrajectory(newInit, vec3(1.,0.,1.));
 			}
 
-			for (int i = 0; i < billiard.polygon.directions.size(); i++)
+			for (int i = 0; i < billiard.polygon.directions_d.size(); i++)
 			{
 				ImGui::InputFloat2(("Vertex #" + std::to_string(i)).c_str(), &billiard.polygon.vertexData[i].x);
 			}
@@ -398,7 +398,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 }
 
-void editScene(GLFWwindow* window, vec2 mouse, int code, FourthBilliard billiard) {
+void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard billiard) {
 	// Note: it is important that all the edits of the polygons or the initial values have
 	// to happen using the billiard class since only there we update the scene_has_changed variable
 	

@@ -58,7 +58,7 @@ void FourthBilliard::iterate(int batch, int nIter)
 	}
 }
 
-void FourthBilliard::updateCoords(vec2 mouse, GLFWwindow* window)
+void FourthBilliard::updateCoords(vec2_d mouse, GLFWwindow* window)
 {
 	if (mode == 0) {
 		polygon.onMouse(window, mouse);

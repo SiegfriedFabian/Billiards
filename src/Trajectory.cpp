@@ -81,11 +81,11 @@ void Trajectory::Reset() {
 	count = 0;
 }
 
-void Trajectory::Reset(vec2 v)
+void Trajectory::Reset(vec2_d v)
 {
 	Reset();
-	vertexData[0] = v;
-	vertexData_d[0] = vec2_d(v);
+	vertexData_d[0] = v;
+	vertexData[0] = v.toFloat();
 }
 
 vec2_d Trajectory::lineIntersection(const vec2_d& p0, const vec2_d& v0, const vec2_d& p1, const vec2_d& v1) {
