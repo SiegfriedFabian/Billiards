@@ -86,7 +86,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main();
 
-void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard billiard);
+void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard& billiard);
 
 void HelpMarker(const char* desc);
 
@@ -211,6 +211,13 @@ int main()
 			billiard.polygon.Clear();
 			clearPolygon = false;
 		}
+		// Sadly for visibility this had to move up here, before the GUI
+		grid.Draw(shaderProgram);
+		ruler.Draw(shaderProgram);
+		xAxis.Draw(shaderProgram);
+		yAxis.Draw(shaderProgram);
+		billiard.drawPolygon(shaderProgram);
+		billiard.drawTrajectories(shaderProgram);
 
 		//---------------------------------------- ImGui ----------------------------------------------//
 		{
@@ -255,26 +262,33 @@ int main()
 
 			ImGui::Text("Width, height: (%.0f, %.0f)", float(SCR_WIDTH), float(SCR_HEIGHT));
 
+			
 			// Slider that appears in the window
 			for (size_t i = 0; i < billiard.trajectories.size(); i++)
 			{
-				ImGui::InputScalarN("Starting point:", ImGuiDataType_Float, &billiard.trajectories[i].vertexData[0].x, 2, NULL, NULL, "%.6f");
-				// TODO  DONE consider using button here "apply changes" like this. That way, no tracking of changes of first iteration neccessary and now jumping of trajectory while getting input
+				ImGui::PushItemWidth(140); // TODO consider using this for all point fields to make it look better
+				ImGui::Text("Starting point:");
 				ImGui::SameLine();
-				if (ImGui::Button("Apply changes")) {
+				ImGui::InputScalarN((" ##" + std::to_string(i)).c_str(), ImGuiDataType_Float, &billiard.trajectories[i].vertexData[0].x, 2, NULL, NULL, "%.6f");
+				ImGui::PopItemWidth();
+				//  DONE consider using button here "apply changes" like this. That way, no tracking of changes of first iteration neccessary and now jumping of trajectory while getting input
+				ImGui::SameLine();
+				if ( ImGui::Button(("Apply changes##" + std::to_string(i)).c_str()) )  { // Buttons need unique names! but anything after ## wont be shown
 					billiard.resetTrajectory(i);
+				}
+				ImGui::SameLine();
+				if (ImGui::Button(("Remove trajectory##" + std::to_string(i)).c_str())) { // Buttons need unique names! but anything after ## wont be shown
+					billiard.removeTrajectory(i);
 				}
 			}
 			ImGui::InputScalarN("Starting point:", ImGuiDataType_Float, &newInit.x, 2, NULL, NULL, "%.6f");
-			//////////// TODO //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// very big bug!
+			//////////// DONE //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// very big bug! FIXED!!! Problem was non unique names of the buttons
 			// all InputScalarN change get the same number when one is changed! I don't understand why? even changing to InputFloat2 does not change it
-			// also they are very hard to click. Consider rendering this last
-			// std::cout << &newInit.x << std::endl;
-			std::cout << &billiard.trajectories[0].vertexData[0].x << std::endl;
+			// also they are very hard to click. Consider rendering this last FIXED
 			ImGui::SameLine();
 			if (ImGui::Button("Add trajectory")) {
-				billiard.addTrajectory(newInit, vec3(1.,0.,1.));
+				billiard.addTrajectory(newInit, vec3(1.,0.,1.)); // TODO consider moving new trajectory part to top of trajectories to make it easier to click many times
 			}
 
 			for (int i = 0; i < billiard.polygon.directions_d.size(); i++)
@@ -317,14 +331,9 @@ int main()
 
 		// ------------------------- Reset trajectories if scene changed ---------------------------------------
 
-		grid.Draw(shaderProgram);
-		ruler.Draw(shaderProgram);
-		xAxis.Draw(shaderProgram);
-		yAxis.Draw(shaderProgram);
-		billiard.drawPolygon(shaderProgram);
-		billiard.drawTrajectories(shaderProgram);
 
-		editScene(window, mouse, billiard.mode, billiard);
+
+		editScene(window, mouse, billiard.mode, billiard); // TODO consider moving this inside the big if And also just write the code there. No need for extra function
 
 		// All the edits happen using either the left (ImGui) or the right (all dragdrop functions) or the ENTER-key. 
 		// So, since this changes the scene, we simly reset every time this happens.
@@ -411,7 +420,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 }
 
-void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard billiard) {
+
+void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard& billiard) {
 	// Note: it is important that all the edits of the polygons or the initial values have
 	// to happen using the billiard class since only there we update the scene_has_changed variable
 	
@@ -422,7 +432,7 @@ void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard billia
 		ruler.dragDropTo(window, mouse);
 	}
 	else {
-		billiard.updateCoords(mouse, window); // TODO, WHY DOES THIS NOT WORK??? I think there might be an error with Reset(vec2 v)
+		billiard.updateCoords(mouse, window);
 	}
 
 }

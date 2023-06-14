@@ -91,8 +91,8 @@ void Trajectory::Reset() {
 // I believe this is due to the Bug from InputScalarN
 void Trajectory::Reset(vec2_d v) 
 {
-	clear();
-	AddVertex(v);
+	this->clear();
+	this->AddVertex(v);
 	count = 0;
 	//std::cout << vertexData_d.size() << std::endl;
 	//Reset();

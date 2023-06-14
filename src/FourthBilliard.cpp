@@ -61,11 +61,14 @@ void FourthBilliard::iterate(int batch, int nIter)
 void FourthBilliard::updateCoords(vec2_d mouse, GLFWwindow* window)
 {
 	if (mode == 0) {
-		polygon.onMouse(window, mouse);
+		this->polygon.onMouse(window, mouse);
 		if (polygon.vertexChange)
 		{
-			resetTrajectories();
-			polygon.vertexChange = false;
+			std::cout << "Data: " << std::endl;
+			std::cout << &polygon.vertexData[0].x << std::endl;
+			std::cout << &trajectories[0].vertexData[0].x << std::endl;
+			this->resetTrajectories();
+			this->polygon.vertexChange = false;
 		}
 		return;
 	}
@@ -73,7 +76,7 @@ void FourthBilliard::updateCoords(vec2_d mouse, GLFWwindow* window)
 	{
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 		{
-			trajectories[mode - 1].Reset(mouse);
+			this->trajectories[mode - 1].Reset(mouse);
 		}
 	}
 }
@@ -120,15 +123,23 @@ void FourthBilliard::clearPolygon()
 
 void FourthBilliard::resetTrajectories()
 {
-	for (auto& traj : trajectories) {
+	for (auto& traj : this->trajectories) {
 		traj.Reset();
 	}
 }
 
 void FourthBilliard::resetTrajectory(int i)
 {
-	if (i < 0 || i > trajectories.size()) { return; } // check if i is valid index of trajectory. 
-	trajectories[i].Reset();
+	if (i < 0 || i > this->trajectories.size()) { std::cout << "does not work";  return; } // check if i is valid index of trajectory. 
+	std::cout << "works";
+	this->trajectories[i].Reset();
+}
+
+void FourthBilliard::removeTrajectory(int i)
+{
+	if (0 < i < trajectories.size()) {
+		trajectories.erase(trajectories.begin() + i);
+	}
 }
 
 void FourthBilliard::makeRegularNPoly(int n)

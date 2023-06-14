@@ -39,6 +39,8 @@ public:
 
 	void resetTrajectory(int i);
 
+	void removeTrajectory(int i);
+
 	// make polygon regular by calling the function from Polygon class
 	void makeRegularNPoly(int n);
 };
