@@ -154,11 +154,13 @@ void shape::dragDropTo(GLFWwindow *window, vec2_d& pos)
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && vertexData.size() > 0) {
 			if (!pickedVertex) {
 				pickedVertexIndex = computeClosestIndex(window, pos);
+				// std::cout << pickedVertexIndex << std::endl;
 				pickedVertex = true;
 			}
 
 			if (length(vertexData_d[pickedVertexIndex] - pos) > EPS) {
 				vertexData_d[pickedVertexIndex] = pos;
+				vertexData[pickedVertex] = pos.toFloat();
 				vertexChange = true;
 			}
 			updateDirections();

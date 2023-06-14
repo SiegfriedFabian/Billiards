@@ -158,6 +158,8 @@ int main()
 	bool drawscreen = true;
 	bool show_grid = 1;
 	bool snapToGrid = false;
+	bool snapP0ToGrid = false;
+	bool snapP1ToGrid = false;
 	bool snapToRuler = false;
 	bool clearPolygon0 = false;
 	bool clearPolygon1 = false;
@@ -174,8 +176,8 @@ int main()
 	double rawMouseX, rawMouseY;
 
 	//---------------------------------------- Billiard controls ----------------------------------------------//
-	int batch = 1;
-	int nIter = 1000;
+	int batch = 10;
+	int nIter = 100000;
 
 
 	float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -215,6 +217,8 @@ int main()
 		//---------------------------------------- Drawing Scene ----------------------------------------------//
 		
 		if(snapToGrid) billiard.snapToGrid();
+		if(snapP0ToGrid) billiard.snapToGrid();
+		if(snapP1ToGrid) billiard.snapToGrid();
 		if(snapToRuler) mouse = projectOntoLine(mouse, ruler);
 		if(copyFirstOntoSecond) billiard.copyPolygon0OntoPolygon1();
 		if(copySecondOntoFirst) billiard.copyPolygon1OntoPolygon0();
@@ -253,6 +257,9 @@ int main()
 			ImGui::Checkbox("Copy first polygon onto second", &copyFirstOntoSecond);
 			ImGui::Checkbox("Copy second polygon onto first", &copySecondOntoFirst);
 			
+			if (ImGui::Button("Start Symplectic Billiards")) {
+				billiard.reset();
+			}
 			ImGui::InputInt("Edges of Polygon 0", &nRegular0, 1);
 			if (ImGui::Button("Make polygon0 regular")) {
 				billiard.polygon0.makeRegularNPoly(nRegular0);
