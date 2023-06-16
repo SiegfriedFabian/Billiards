@@ -87,7 +87,7 @@
 # CMake
 cmake-build-*/
 cmake_build/
-
+build/
 
 
 # Mongo Explorer plugin
@@ -139,8 +139,3 @@ _deps
 /.vs
 .vscode/launch.json
 .vscode/settings.json
-
-
-build/*
-
-!Makefile

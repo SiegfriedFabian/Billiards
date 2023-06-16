@@ -143,17 +143,30 @@ imgui/fast:
 .PHONY : imgui/fast
 
 #=============================================================================
-# Target rules for targets named euclidean
+# Target rules for targets named SymplecticBilliards
 
 # Build rule for target.
-euclidean: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 euclidean
-.PHONY : euclidean
+SymplecticBilliards: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 SymplecticBilliards
+.PHONY : SymplecticBilliards
 
 # fast build rule for target.
-euclidean/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/build
-.PHONY : euclidean/fast
+SymplecticBilliards/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/build
+.PHONY : SymplecticBilliards/fast
+
+#=============================================================================
+# Target rules for targets named 4th
+
+# Build rule for target.
+4th: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 4th
+.PHONY : 4th
+
+# fast build rule for target.
+4th/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/build
+.PHONY : 4th/fast
 
 include/imgui/imgui.o: include/imgui/imgui.cpp.o
 .PHONY : include/imgui/imgui.o
@@ -323,36 +336,84 @@ include/imgui/imgui_widgets.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/imgui.dir/build.make CMakeFiles/imgui.dir/include/imgui/imgui_widgets.cpp.s
 .PHONY : include/imgui/imgui_widgets.cpp.s
 
-src/EuclideanBilliard.o: src/EuclideanBilliard.cpp.o
-.PHONY : src/EuclideanBilliard.o
+src/4th.o: src/4th.cpp.o
+.PHONY : src/4th.o
 
 # target to build an object file
-src/EuclideanBilliard.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/EuclideanBilliard.cpp.o
-.PHONY : src/EuclideanBilliard.cpp.o
+src/4th.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/4th.cpp.o
+.PHONY : src/4th.cpp.o
 
-src/EuclideanBilliard.i: src/EuclideanBilliard.cpp.i
-.PHONY : src/EuclideanBilliard.i
+src/4th.i: src/4th.cpp.i
+.PHONY : src/4th.i
 
 # target to preprocess a source file
-src/EuclideanBilliard.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/EuclideanBilliard.cpp.i
-.PHONY : src/EuclideanBilliard.cpp.i
+src/4th.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/4th.cpp.i
+.PHONY : src/4th.cpp.i
 
-src/EuclideanBilliard.s: src/EuclideanBilliard.cpp.s
-.PHONY : src/EuclideanBilliard.s
+src/4th.s: src/4th.cpp.s
+.PHONY : src/4th.s
 
 # target to generate assembly for a file
-src/EuclideanBilliard.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/EuclideanBilliard.cpp.s
-.PHONY : src/EuclideanBilliard.cpp.s
+src/4th.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/4th.cpp.s
+.PHONY : src/4th.cpp.s
+
+src/FourthBilliard.o: src/FourthBilliard.cpp.o
+.PHONY : src/FourthBilliard.o
+
+# target to build an object file
+src/FourthBilliard.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/FourthBilliard.cpp.o
+.PHONY : src/FourthBilliard.cpp.o
+
+src/FourthBilliard.i: src/FourthBilliard.cpp.i
+.PHONY : src/FourthBilliard.i
+
+# target to preprocess a source file
+src/FourthBilliard.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/FourthBilliard.cpp.i
+.PHONY : src/FourthBilliard.cpp.i
+
+src/FourthBilliard.s: src/FourthBilliard.cpp.s
+.PHONY : src/FourthBilliard.s
+
+# target to generate assembly for a file
+src/FourthBilliard.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/FourthBilliard.cpp.s
+.PHONY : src/FourthBilliard.cpp.s
+
+src/SymplecticBilliard.o: src/SymplecticBilliard.cpp.o
+.PHONY : src/SymplecticBilliard.o
+
+# target to build an object file
+src/SymplecticBilliard.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/SymplecticBilliard.cpp.o
+.PHONY : src/SymplecticBilliard.cpp.o
+
+src/SymplecticBilliard.i: src/SymplecticBilliard.cpp.i
+.PHONY : src/SymplecticBilliard.i
+
+# target to preprocess a source file
+src/SymplecticBilliard.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/SymplecticBilliard.cpp.i
+.PHONY : src/SymplecticBilliard.cpp.i
+
+src/SymplecticBilliard.s: src/SymplecticBilliard.cpp.s
+.PHONY : src/SymplecticBilliard.s
+
+# target to generate assembly for a file
+src/SymplecticBilliard.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/SymplecticBilliard.cpp.s
+.PHONY : src/SymplecticBilliard.cpp.s
 
 src/Trajectory.o: src/Trajectory.cpp.o
 .PHONY : src/Trajectory.o
 
 # target to build an object file
 src/Trajectory.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/Trajectory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/Trajectory.cpp.o
 .PHONY : src/Trajectory.cpp.o
 
 src/Trajectory.i: src/Trajectory.cpp.i
@@ -360,7 +421,7 @@ src/Trajectory.i: src/Trajectory.cpp.i
 
 # target to preprocess a source file
 src/Trajectory.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/Trajectory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/Trajectory.cpp.i
 .PHONY : src/Trajectory.cpp.i
 
 src/Trajectory.s: src/Trajectory.cpp.s
@@ -368,32 +429,8 @@ src/Trajectory.s: src/Trajectory.cpp.s
 
 # target to generate assembly for a file
 src/Trajectory.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/Trajectory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/Trajectory.cpp.s
 .PHONY : src/Trajectory.cpp.s
-
-src/euclid.o: src/euclid.cpp.o
-.PHONY : src/euclid.o
-
-# target to build an object file
-src/euclid.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/euclid.cpp.o
-.PHONY : src/euclid.cpp.o
-
-src/euclid.i: src/euclid.cpp.i
-.PHONY : src/euclid.i
-
-# target to preprocess a source file
-src/euclid.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/euclid.cpp.i
-.PHONY : src/euclid.cpp.i
-
-src/euclid.s: src/euclid.cpp.s
-.PHONY : src/euclid.s
-
-# target to generate assembly for a file
-src/euclid.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/euclid.cpp.s
-.PHONY : src/euclid.cpp.s
 
 src/glad.o: src/glad.c.o
 .PHONY : src/glad.o
@@ -424,7 +461,8 @@ src/shaderClass.o: src/shaderClass.cpp.o
 
 # target to build an object file
 src/shaderClass.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/shaderClass.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/shaderClass.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/shaderClass.cpp.o
 .PHONY : src/shaderClass.cpp.o
 
 src/shaderClass.i: src/shaderClass.cpp.i
@@ -432,7 +470,8 @@ src/shaderClass.i: src/shaderClass.cpp.i
 
 # target to preprocess a source file
 src/shaderClass.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/shaderClass.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/shaderClass.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/shaderClass.cpp.i
 .PHONY : src/shaderClass.cpp.i
 
 src/shaderClass.s: src/shaderClass.cpp.s
@@ -440,7 +479,8 @@ src/shaderClass.s: src/shaderClass.cpp.s
 
 # target to generate assembly for a file
 src/shaderClass.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/shaderClass.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/shaderClass.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/shaderClass.cpp.s
 .PHONY : src/shaderClass.cpp.s
 
 src/shape.o: src/shape.cpp.o
@@ -448,7 +488,8 @@ src/shape.o: src/shape.cpp.o
 
 # target to build an object file
 src/shape.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/shape.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/shape.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/shape.cpp.o
 .PHONY : src/shape.cpp.o
 
 src/shape.i: src/shape.cpp.i
@@ -456,7 +497,8 @@ src/shape.i: src/shape.cpp.i
 
 # target to preprocess a source file
 src/shape.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/shape.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/shape.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/shape.cpp.i
 .PHONY : src/shape.cpp.i
 
 src/shape.s: src/shape.cpp.s
@@ -464,8 +506,33 @@ src/shape.s: src/shape.cpp.s
 
 # target to generate assembly for a file
 src/shape.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/euclidean.dir/build.make CMakeFiles/euclidean.dir/src/shape.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/shape.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/4th.dir/build.make CMakeFiles/4th.dir/src/shape.cpp.s
 .PHONY : src/shape.cpp.s
+
+src/symplectic.o: src/symplectic.cpp.o
+.PHONY : src/symplectic.o
+
+# target to build an object file
+src/symplectic.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/symplectic.cpp.o
+.PHONY : src/symplectic.cpp.o
+
+src/symplectic.i: src/symplectic.cpp.i
+.PHONY : src/symplectic.i
+
+# target to preprocess a source file
+src/symplectic.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/symplectic.cpp.i
+.PHONY : src/symplectic.cpp.i
+
+src/symplectic.s: src/symplectic.cpp.s
+.PHONY : src/symplectic.s
+
+# target to generate assembly for a file
+src/symplectic.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SymplecticBilliards.dir/build.make CMakeFiles/SymplecticBilliards.dir/src/symplectic.cpp.s
+.PHONY : src/symplectic.cpp.s
 
 # Help Target
 help:
@@ -475,7 +542,8 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... euclidean"
+	@echo "... 4th"
+	@echo "... SymplecticBilliards"
 	@echo "... glad"
 	@echo "... imgui"
 	@echo "... include/imgui/imgui.o"
@@ -499,15 +567,18 @@ help:
 	@echo "... include/imgui/imgui_widgets.o"
 	@echo "... include/imgui/imgui_widgets.i"
 	@echo "... include/imgui/imgui_widgets.s"
-	@echo "... src/EuclideanBilliard.o"
-	@echo "... src/EuclideanBilliard.i"
-	@echo "... src/EuclideanBilliard.s"
+	@echo "... src/4th.o"
+	@echo "... src/4th.i"
+	@echo "... src/4th.s"
+	@echo "... src/FourthBilliard.o"
+	@echo "... src/FourthBilliard.i"
+	@echo "... src/FourthBilliard.s"
+	@echo "... src/SymplecticBilliard.o"
+	@echo "... src/SymplecticBilliard.i"
+	@echo "... src/SymplecticBilliard.s"
 	@echo "... src/Trajectory.o"
 	@echo "... src/Trajectory.i"
 	@echo "... src/Trajectory.s"
-	@echo "... src/euclid.o"
-	@echo "... src/euclid.i"
-	@echo "... src/euclid.s"
 	@echo "... src/glad.o"
 	@echo "... src/glad.i"
 	@echo "... src/glad.s"
@@ -517,6 +588,9 @@ help:
 	@echo "... src/shape.o"
 	@echo "... src/shape.i"
 	@echo "... src/shape.s"
+	@echo "... src/symplectic.o"
+	@echo "... src/symplectic.i"
+	@echo "... src/symplectic.s"
 .PHONY : help
 
 
