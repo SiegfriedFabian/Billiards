@@ -298,8 +298,8 @@ void Poly::makeNStar(int n, double innerRadius, double outerRadius){
     if (n <= 2) return; // if n <= 2 then dont do anything as we cant have a polygon
     this->Clear(); // remove all curent vertices
     for (int i = 0; i < n; i++) {
-        this->AddVertex(vec2_d(outerRadius * std::cos(2 * PI * i / n ), outerRadius * sin(2 * PI * i / n))); // add new vertices)
-        this->AddVertex(vec2_d(innerRadius * std::cos(2 * PI * i / n + PI / n), innerRadius * sin(2 * PI * i / n + PI / n))); // add new vertices)
+        this->AddVertex(vec2_d(outerRadius * cos(2 * PI * i / n ), outerRadius * sin(2 * PI * i / n))); // add new vertices)
+        this->AddVertex(vec2_d(innerRadius * cos(2 * PI * i / n + PI / n), innerRadius * sin(2 * PI * i / n + PI / n))); // add new vertices)
     }
     this->ClosePolygon(); // close the polygon again
 }
@@ -308,7 +308,7 @@ void Poly::makeRegularNPoly(int n, double radius){
     if (n <= 2) return; // if n <= 2 then dont do anything as we cant have a polygon
     this->Clear(); // remove all curent vertices
     for (int i = 0; i < n; i++) {
-        this->AddVertex(vec2_d(radius * std::cos(2 * PI * i / n), radius * sin(2 * PI * i / n))); // add new vertices
+        this->AddVertex(vec2_d(radius * cos(2 * PI * i / n), radius * sin(2 * PI * i / n))); // add new vertices
     }
     this->ClosePolygon(); // close the polygon again
 }
