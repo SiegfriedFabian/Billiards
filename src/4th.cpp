@@ -207,10 +207,10 @@ int main()
 
 		if (snapToGrid) billiard.snapToGrid();
 		if (snapToRuler) mouse = projectOntoLine(mouse, ruler);
-		if (clearPolygon) {
-			billiard.polygon.Clear();
-			clearPolygon = false;
-		}
+		//if (clearPolygon) {
+		//	billiard.clearPolygon();	// TODO, right now there is some Bug here that stops computation of trajectory. Need to track close Polygon in order to stop calculation and resume it
+		//	clearPolygon = false;
+		//}
 		// Sadly for visibility this had to move up here, before the GUI
 		grid.Draw(shaderProgram);
 		ruler.Draw(shaderProgram);
@@ -235,22 +235,33 @@ int main()
 			ImGui::Checkbox("Show Grid", &show_grid);
 			ImGui::Checkbox("Snap to grid", &snapToGrid); ImGui::SameLine();
 			ImGui::Checkbox("Snap to ruler", &snapToRuler);
-			ImGui::Checkbox("Clear polygon0", &clearPolygon);
+			//ImGui::Checkbox("Clear polygon0", &clearPolygon);  // TODO DONE, consider making this a button instead of a checkbox
+			if (ImGui::Button("Clear polygon")) {
+				billiard.clearPolygon();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Close polygon")) {
+				billiard.polygon.ClosePolygon();
+			}
 
+			ImGui::PushItemWidth(80);
 			ImGui::InputInt("Edges of Polygon", &nRegular, 1);
+			ImGui::SameLine();
 			if (ImGui::Button("Make polygon regular")) {
 				billiard.makeRegularNPoly(nRegular);											/// make regular in billiards //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			}
+			ImGui::PopItemWidth();
+			ImGui::PushItemWidth(140);
 			ImGui::InputInt("Number of iterations", &nIter, 1);
 			ImGui::InputInt("Batch", &batch, 1);
+			ImGui::PopItemWidth();
 			ImGui::Text("Drag and drop whole objects (right-mouse or  two-finger press for Mac):");
 			ImGui::RadioButton("Ruler", &billiard.mode, -1);
 			ImGui::RadioButton("Polygon", &billiard.mode, 0);									/////// mode inside billiards ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			for (int i = 0; i < billiard.trajectories.size(); i++)
 			{
 				// TODO maybe move these Buttons to the initial values of the trajectories, Otherwise if there are many trajectories, the Buttons "leave" the ImGUI Window
-				ImGui::SameLine();
-			 	ImGui::RadioButton(("change #" + std::to_string(i)).c_str(), &billiard.mode, i + 1); 
+				
 			}
 			ImGui::Text("Drag and drop vertices of objects (right-mouse or two-finger press for Mac):");
 
@@ -262,6 +273,20 @@ int main()
 
 			ImGui::Text("Width, height: (%.0f, %.0f)", float(SCR_WIDTH), float(SCR_HEIGHT));
 
+
+			ImGui::Text("New Trajectory at:");
+			ImGui::PushItemWidth(140);
+			ImGui::SameLine();
+			ImGui::InputScalarN(" ## starting point", ImGuiDataType_Float, &newInit.x, 2, NULL, NULL, "%.6f");
+			ImGui::PopItemWidth();
+			//////////// DONE //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// very big bug! FIXED!!! Problem was non unique names of the buttons
+			// all InputScalarN change get the same number when one is changed! I don't understand why? even changing to InputFloat2 does not change it
+			// also they are very hard to click. Consider rendering this last FIXED
+			ImGui::SameLine();
+			if (ImGui::Button("Add trajectory")) {
+				billiard.addTrajectory(newInit, vec3(1., 0., 1.)); // TODO consider moving new trajectory part to top of trajectories to make it easier to click many times
+			}
 			
 			// Slider that appears in the window
 			for (size_t i = 0; i < billiard.trajectories.size(); i++)
@@ -276,24 +301,21 @@ int main()
 				if ( ImGui::Button(("Apply changes##" + std::to_string(i)).c_str()) )  { // Buttons need unique names! but anything after ## wont be shown
 					billiard.resetTrajectory(i);
 				}
+				
 				ImGui::SameLine();
 				if (ImGui::Button(("Remove trajectory##" + std::to_string(i)).c_str())) { // Buttons need unique names! but anything after ## wont be shown
 					billiard.removeTrajectory(i);
 				}
+				ImGui::SameLine();
+				ImGui::RadioButton(("change #" + std::to_string(i)).c_str(), &billiard.mode, i + 1);
 			}
-			ImGui::InputScalarN("Starting point:", ImGuiDataType_Float, &newInit.x, 2, NULL, NULL, "%.6f");
-			//////////// DONE //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// very big bug! FIXED!!! Problem was non unique names of the buttons
-			// all InputScalarN change get the same number when one is changed! I don't understand why? even changing to InputFloat2 does not change it
-			// also they are very hard to click. Consider rendering this last FIXED
-			ImGui::SameLine();
-			if (ImGui::Button("Add trajectory")) {
-				billiard.addTrajectory(newInit, vec3(1.,0.,1.)); // TODO consider moving new trajectory part to top of trajectories to make it easier to click many times
-			}
-
+			
+			ImGui::Text("Polygon:");	// TODO needs "apply changes" like behaviour as well
 			for (int i = 0; i < billiard.polygon.directions_d.size(); i++)
 			{
+				ImGui::PushItemWidth(140);
 				ImGui::InputFloat2(("Vertex #" + std::to_string(i)).c_str(), &billiard.polygon.vertexData[i].x);
+				ImGui::PopItemWidth();
 			}
 
 

@@ -48,10 +48,10 @@ Trajectory::Trajectory(vec2_d start, Poly* p, vec3 c) {
 void Trajectory::iterate() {
 	vec2_d pos = vertexData_d.back();
 	auto tangentVertices = computeTangentVertices(pos);
-	Circle_d circle = computeOsculatingCircle(pos, vec2_d(polygon->vertexData[tangentVertices.first]), vec2_d(polygon->vertexData[tangentVertices.second]));
-	vec2_d thirdTangentDirection = normalize(pos - vec2_d(polygon->vertexData[tangentVertices.second])); // direction of the third tangent from Circle to Poly (the weird one)
+	Circle_d circle = computeOsculatingCircle(pos, polygon->vertexData_d[tangentVertices.first], polygon->vertexData_d[tangentVertices.second]);
+	vec2_d thirdTangentDirection = normalize(pos - polygon->vertexData_d[tangentVertices.second]); // direction of the third tangent from Circle to Poly (the weird one)
 	auto tangentVerticesCircle = tangentPolyCircle(tangentVertices.second + 1, circle, thirdTangentDirection);	// call with +1, since we dont need to check current point but next point
-	vec2_d direction1 = normalize(vec2_d(polygon->vertexData[tangentVertices.second]) - pos); // direction from starting point to new point
+	vec2_d direction1 = normalize(polygon->vertexData_d[tangentVertices.second] - pos); // direction from starting point to new point
 	vec2_d direction2 = normalize(tangentVerticesCircle.first - tangentVerticesCircle.second);
 	vec2_d nextPoint =  pos + lineIntersection(pos, direction1, tangentVerticesCircle.second, direction2)[0] * direction1;
 
@@ -137,14 +137,14 @@ std::pair<int, int> Trajectory::computeTangentVertices(vec2_d pos) {
 	std::pair<int, int> currentBestVertices = std::make_pair(0, 1);
 	for (int i = 0; i < n; ++i) {
 		for (int j = i + 1; j < n; ++j) {
-			double angle = dot(vec2_d(polygon->vertexData[i]) - pos, vec2_d(polygon->vertexData[j]) - pos) / (length(vec2_d(polygon->vertexData[i]) - pos) * length(vec2_d(polygon->vertexData[j]) - pos));
+			double angle = dot(polygon->vertexData_d[i] - pos, polygon->vertexData_d[j] - pos) / (length(polygon->vertexData_d[i] - pos) * length(polygon->vertexData_d[j] - pos));
 			if (angle < currentLargestAngle) { // Yes, < is correct here, since angle is actually cos(angle) and cos is monoton decreasing
 				currentLargestAngle = angle;
 				currentBestVertices = std::make_pair(i, j);
 			}
 		}
 	}
-	if (det(vec2_d(polygon->vertexData[currentBestVertices.first]) - pos, vec2_d(polygon->vertexData[currentBestVertices.second]) - pos) > 0.0) {
+	if (det(polygon->vertexData_d[currentBestVertices.first] - pos, polygon->vertexData_d[currentBestVertices.second] - pos) > 0.0) {
 		return std::make_pair(currentBestVertices.second, currentBestVertices.first); // if tangentVertices does not have size 2, we have a problem TODO
 	}
 	return std::make_pair(currentBestVertices.first, currentBestVertices.second);
@@ -190,11 +190,11 @@ std::pair<vec2_d, vec2_d> Trajectory::tangentPolyCircle(const int& startVertex, 
 			// ok, this will look very cursed for an angle calculation, but draw a picture and it makes sense:
 			// we know that the angle between thirdTangentDirection and the new tangent direction must be between 0� and 180� by construction of circle
 			// the biggest angle then gives us the second tangent point
-			vec2_d tangentPoint = tangentPointCircle(vec2_d(polygon->vertexData[i % n]), circle); 
-			double angle = dot(thirdTangentDirection, normalize(vec2_d(polygon->vertexData[i % n]) - tangentPoint));
+			vec2_d tangentPoint = tangentPointCircle(polygon->vertexData_d[i % n], circle); 
+			double angle = dot(thirdTangentDirection, normalize(polygon->vertexData_d[i % n] - tangentPoint));
 			if (angle < maxAngle) {
 				maxAngle = angle;
-				tangent = std::make_pair(vec2_d(polygon->vertexData[i % n]), tangentPoint);
+				tangent = std::make_pair(polygon->vertexData_d[i % n], tangentPoint);
 			}
 		}
 		catch (const std::domain_error& e)

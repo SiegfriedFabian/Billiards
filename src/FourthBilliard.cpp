@@ -34,7 +34,7 @@ FourthBilliard::FourthBilliard()
 	// Adding objects to the scene
 	polygon.Create();
 
-	this->makeRegularNPoly(10);
+	//this->makeRegularNPoly(10);
 
 	// add initial trajectory
 	addTrajectory(vec2(5, 5), vec3(0.0, 1.0, 0.0));
@@ -52,6 +52,10 @@ void FourthBilliard::addTrajectory(vec2 start, vec3 color) {
 
 void FourthBilliard::iterate(int batch, int nIter)
 {
+	if (!polygon.closed)
+	{
+		return;
+	}
 	for (auto& traj : trajectories)
 	{
 		traj.iterate(batch, nIter);
@@ -64,9 +68,6 @@ void FourthBilliard::updateCoords(vec2_d mouse, GLFWwindow* window)
 		this->polygon.onMouse(window, mouse);
 		if (polygon.vertexChange)
 		{
-			std::cout << "Data: " << std::endl;
-			std::cout << &polygon.vertexData[0].x << std::endl;
-			std::cout << &trajectories[0].vertexData[0].x << std::endl;
 			this->resetTrajectories();
 			this->polygon.vertexChange = false;
 		}
@@ -116,9 +117,11 @@ std::vector<vec2_d> FourthBilliard::getStartPoints()
 void FourthBilliard::clearPolygon()
 {
 	polygon.Clear();
-	polygon.AddVertex(vec2(0, 0));
-	polygon.AddVertex(vec2(1, 0));
+	polygon.AddVertex(vec2_d(0, 0));
+	polygon.AddVertex(vec2_d(1, 0));
 	polygon.vertexChange = true;
+	resetTrajectories();
+	mode = 0;	// Put mode into edit Polygon
 }
 
 void FourthBilliard::resetTrajectories()
