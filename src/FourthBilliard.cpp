@@ -90,7 +90,7 @@ bool FourthBilliard::polygonClosed()
 void FourthBilliard::snapToGrid()
 {
 	polygon.roundData();
-	resetTrajectories();
+	//resetTrajectories();
 }
 
 void FourthBilliard::drawTrajectories(Shader& shaderProgram)

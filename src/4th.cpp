@@ -2,9 +2,9 @@
 // // How to arrange elements in IMGUI???
 // // - fix resize
 // // - big axes
-// // - edit switch -> on "edit initial values" call billiard method "are_initial_values_updated" to match imgui input
-// // - spawn new trajectory button like "number of iterations". Spawns trajectory at given "new starting point"
-// // - multiple Trajectories with individual color-picker
+// // - edit switch -> on "edit initial values" call billiard method "are_initial_values_updated" to match imgui input DONE WITH ALTERNATIVE METHOD
+// // - spawn new trajectory button like "number of iterations". Spawns trajectory at given "new starting point" DONE
+// // - multiple Trajectories with individual color-picker SOMEWHAT DONE
 // // - create integer field for a variable n and a button "create regular n-gon"  DONE
 // //---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -164,8 +164,8 @@ int main()
 	//double rawMouseX, rawMouseY;
 
 	//---------------------------------------- Billiard controls ----------------------------------------------//
-	int batch = 100;
-	int nIter = 100000;
+	int batch = 1000;
+	int nIter = 1000000;
 	FourthBilliard billiard;
 	vec2 newInit = vec2();
 
@@ -208,7 +208,7 @@ int main()
 		if (snapToGrid) billiard.snapToGrid();
 		if (snapToRuler) mouse = projectOntoLine(mouse, ruler);
 		//if (clearPolygon) {
-		//	billiard.clearPolygon();	// TODO, right now there is some Bug here that stops computation of trajectory. Need to track close Polygon in order to stop calculation and resume it
+		//	billiard.clearPolygon();
 		//	clearPolygon = false;
 		//}
 		// Sadly for visibility this had to move up here, before the GUI
@@ -233,9 +233,9 @@ int main()
 			// Text that appears in the window
 			// Checkbox that appears in the window
 			ImGui::Checkbox("Show Grid", &show_grid);
-			ImGui::Checkbox("Snap to grid", &snapToGrid); ImGui::SameLine();
+			ImGui::Checkbox("Snap to grid", &snapToGrid); ImGui::SameLine();	// TODO currently leads to weird behaviour, since Trajectories are not reset
 			ImGui::Checkbox("Snap to ruler", &snapToRuler);
-			//ImGui::Checkbox("Clear polygon0", &clearPolygon);  // TODO DONE, consider making this a button instead of a checkbox
+			//ImGui::Checkbox("Clear polygon0", &clearPolygon);
 			if (ImGui::Button("Clear polygon")) {
 				billiard.clearPolygon();
 			}
@@ -258,11 +258,7 @@ int main()
 			ImGui::Text("Drag and drop whole objects (right-mouse or  two-finger press for Mac):");
 			ImGui::RadioButton("Ruler", &billiard.mode, -1);
 			ImGui::RadioButton("Polygon", &billiard.mode, 0);									/////// mode inside billiards ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			for (int i = 0; i < billiard.trajectories.size(); i++)
-			{
-				// TODO maybe move these Buttons to the initial values of the trajectories, Otherwise if there are many trajectories, the Buttons "leave" the ImGUI Window
-				
-			}
+
 			ImGui::Text("Drag and drop vertices of objects (right-mouse or two-finger press for Mac):");
 
 			// Framerate info
@@ -279,28 +275,31 @@ int main()
 			ImGui::SameLine();
 			ImGui::InputScalarN(" ## starting point", ImGuiDataType_Float, &newInit.x, 2, NULL, NULL, "%.6f");
 			ImGui::PopItemWidth();
-			//////////// DONE //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// very big bug! FIXED!!! Problem was non unique names of the buttons
-			// all InputScalarN change get the same number when one is changed! I don't understand why? even changing to InputFloat2 does not change it
-			// also they are very hard to click. Consider rendering this last FIXED
+
 			ImGui::SameLine();
 			if (ImGui::Button("Add trajectory")) {
-				billiard.addTrajectory(newInit, vec3(1., 0., 1.)); // TODO consider moving new trajectory part to top of trajectories to make it easier to click many times
+				billiard.addTrajectory(newInit, vec3(1., 0., 1.)); 
 			}
 			
 			// Slider that appears in the window
 			for (size_t i = 0; i < billiard.trajectories.size(); i++)
 			{
-				ImGui::PushItemWidth(140); // TODO consider using this for all point fields to make it look better
+				ImGui::PushItemWidth(140);
 				ImGui::Text("Starting point:");
 				ImGui::SameLine();
-				ImGui::InputScalarN((" ##" + std::to_string(i)).c_str(), ImGuiDataType_Float, &billiard.trajectories[i].vertexData[0].x, 2, NULL, NULL, "%.6f");
+				ImGui::InputScalarN((" ##start" + std::to_string(i)).c_str(), ImGuiDataType_Float, &billiard.trajectories[i].vertexData[0].x, 2, NULL, NULL, "%.6f");
 				ImGui::PopItemWidth();
-				//  DONE consider using button here "apply changes" like this. That way, no tracking of changes of first iteration neccessary and now jumping of trajectory while getting input
+				
+				// TODO need to consider changing order of UI here
+
 				ImGui::SameLine();
 				if ( ImGui::Button(("Apply changes##" + std::to_string(i)).c_str()) )  { // Buttons need unique names! but anything after ## wont be shown
 					billiard.resetTrajectory(i);
 				}
+
+				ImGui::PushItemWidth(140);
+				ImGui::ColorEdit3(("##color" + std::to_string(i)).c_str(), &billiard.trajectories[i].color.x);
+				ImGui::PopItemWidth();
 				
 				ImGui::SameLine();
 				if (ImGui::Button(("Remove trajectory##" + std::to_string(i)).c_str())) { // Buttons need unique names! but anything after ## wont be shown
@@ -310,7 +309,7 @@ int main()
 				ImGui::RadioButton(("change #" + std::to_string(i)).c_str(), &billiard.mode, i + 1);
 			}
 			
-			ImGui::Text("Polygon:");	// TODO needs "apply changes" like behaviour as well
+			ImGui::Text("Polygon:");	// TODO needs "apply changes" like behaviour as well. ESPECIALL SINCE THIS IS BUGGED FOR CLOSED POLYGON
 			for (int i = 0; i < billiard.polygon.directions_d.size(); i++)
 			{
 				ImGui::PushItemWidth(140);
@@ -355,15 +354,16 @@ int main()
 
 
 
-		editScene(window, mouse, billiard.mode, billiard); // TODO consider moving this inside the big if And also just write the code there. No need for extra function
-
+		
 		// All the edits happen using either the left (ImGui) or the right (all dragdrop functions) or the ENTER-key. 
 		// So, since this changes the scene, we simly reset every time this happens.
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS ||
 			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ||
 			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
 			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
-			// billiard.reset(); TODO
+			// billiard.reset();
+			editScene(window, mouse, billiard.mode, billiard); // TODO polygon mode might need some rethinking as chosen vertex is only changed, if another button then right mouse is pressed
+
 		}
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
