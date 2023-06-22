@@ -13,6 +13,7 @@ public:
 
 	int mode=0;
 
+	float lineWidth = 1.0;	// default line width for all objects
 
 
 
@@ -25,6 +26,8 @@ public:
 	// change current starting points and polygon dependant on mode and mouse position
 	void updateCoords(vec2_d mouse, GLFWwindow* window);
 
+	void resetLineWidth();	// resets the line width of all objects
+
 	bool polygonClosed();
 
 	void snapToGrid();
@@ -36,6 +39,8 @@ public:
 
 	void clearPolygon();
 	void resetTrajectories();
+
+	void updatePolygon(); // this function is used to update the polygon, ones user has made Input
 
 	void resetTrajectory(int i);
 

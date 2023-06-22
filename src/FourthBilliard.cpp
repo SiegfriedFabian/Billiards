@@ -64,7 +64,9 @@ void FourthBilliard::iterate(int batch, int nIter)
 
 void FourthBilliard::updateCoords(vec2_d mouse, GLFWwindow* window)
 {
+	resetLineWidth();
 	if (mode == 0) {
+		polygon.lineWidth = 5.0;
 		this->polygon.onMouse(window, mouse);
 		if (polygon.vertexChange)
 		{
@@ -73,12 +75,21 @@ void FourthBilliard::updateCoords(vec2_d mouse, GLFWwindow* window)
 		}
 		return;
 	}
-	if (0 < mode < trajectories.size() + 1)
+	if (0 < mode && mode < trajectories.size() + 1)
 	{
+		trajectories[mode - 1].lineWidth = 5.0;
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 		{
 			this->trajectories[mode - 1].Reset(mouse);
 		}
+	}
+}
+
+void FourthBilliard::resetLineWidth()
+{
+	polygon.lineWidth = lineWidth;
+	for (auto& traj : trajectories) {
+		traj.lineWidth = lineWidth;
 	}
 }
 
@@ -129,6 +140,12 @@ void FourthBilliard::resetTrajectories()
 	for (auto& traj : this->trajectories) {
 		traj.Reset();
 	}
+}
+
+void FourthBilliard::updatePolygon()
+{
+	polygon.updateData();
+	resetTrajectories();
 }
 
 void FourthBilliard::resetTrajectory(int i)

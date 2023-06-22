@@ -86,7 +86,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main();
 
-void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard& billiard);
+void editScene(GLFWwindow* window, vec2_d mouse, int& code, FourthBilliard& billiard);
 
 void HelpMarker(const char* desc);
 
@@ -201,12 +201,14 @@ int main()
 
 		//---------------------------------------- Billiard ----------------------------------------------------//
 
+		if (snapToGrid) billiard.snapToGrid();
+		if (snapToRuler) mouse = projectOntoLine(mouse, ruler);
 		billiard.iterate(batch, nIter);
 
 		//---------------------------------------- Drawing Scene ----------------------------------------------//
 
-		if (snapToGrid) billiard.snapToGrid();
-		if (snapToRuler) mouse = projectOntoLine(mouse, ruler);
+		
+		
 		//if (clearPolygon) {
 		//	billiard.clearPolygon();
 		//	clearPolygon = false;
@@ -233,7 +235,7 @@ int main()
 			// Text that appears in the window
 			// Checkbox that appears in the window
 			ImGui::Checkbox("Show Grid", &show_grid);
-			ImGui::Checkbox("Snap to grid", &snapToGrid); ImGui::SameLine();	// TODO currently leads to weird behaviour, since Trajectories are not reset
+			ImGui::Checkbox("Snap to grid", &snapToGrid); ImGui::SameLine();	// DONE currently leads to weird behaviour, since Trajectories are not reset
 			ImGui::Checkbox("Snap to ruler", &snapToRuler);
 			//ImGui::Checkbox("Clear polygon0", &clearPolygon);
 			if (ImGui::Button("Clear polygon")) {
@@ -278,14 +280,18 @@ int main()
 
 			ImGui::SameLine();
 			if (ImGui::Button("Add trajectory")) {
-				billiard.addTrajectory(newInit, vec3(1., 0., 1.)); 
+				float red = 1;
+				float green = 0;
+				float blue = 1;
+				vec3 color = vec3(red, green, blue);
+				billiard.addTrajectory(newInit, color); 
 			}
 			
 			// Slider that appears in the window
 			for (size_t i = 0; i < billiard.trajectories.size(); i++)
 			{
 				ImGui::PushItemWidth(140);
-				ImGui::Text("Starting point:");
+				ImGui::Text(("Starting point of " + std::to_string(i)).c_str());
 				ImGui::SameLine();
 				ImGui::InputScalarN((" ##start" + std::to_string(i)).c_str(), ImGuiDataType_Float, &billiard.trajectories[i].vertexData[0].x, 2, NULL, NULL, "%.6f");
 				ImGui::PopItemWidth();
@@ -309,12 +315,15 @@ int main()
 				ImGui::RadioButton(("change #" + std::to_string(i)).c_str(), &billiard.mode, i + 1);
 			}
 			
-			ImGui::Text("Polygon:");	// TODO needs "apply changes" like behaviour as well. ESPECIALL SINCE THIS IS BUGGED FOR CLOSED POLYGON
+			ImGui::Text("Polygon:");	// DONE needs "apply changes" like behaviour as well. ESPECIALL SINCE THIS IS BUGGED FOR CLOSED POLYGON
 			for (int i = 0; i < billiard.polygon.directions_d.size(); i++)
 			{
 				ImGui::PushItemWidth(140);
 				ImGui::InputFloat2(("Vertex #" + std::to_string(i)).c_str(), &billiard.polygon.vertexData[i].x);
 				ImGui::PopItemWidth();
+			}
+			if (ImGui::Button("Apply changes to polygon")) { // Buttons need unique names! but anything after ## wont be shown
+				billiard.updatePolygon();
 			}
 
 
@@ -352,6 +361,10 @@ int main()
 
 		// ------------------------- Reset trajectories if scene changed ---------------------------------------
 
+		// had to take it out of the if since otherwise line thickness is not changed 
+		// we may have to come up with something smarter instead?
+		// like have extra function "apply thickness" to change the thickness. But it is porbably not worth the work
+		editScene(window, mouse, billiard.mode, billiard); // TODO polygon mode might need some rethinking as chosen vertex is only changed, if another button then right mouse is pressed
 
 
 		
@@ -362,9 +375,9 @@ int main()
 			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
 			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
 			// billiard.reset();
-			editScene(window, mouse, billiard.mode, billiard); // TODO polygon mode might need some rethinking as chosen vertex is only changed, if another button then right mouse is pressed
-
+			
 		}
+
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
@@ -443,19 +456,24 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 
-void editScene(GLFWwindow* window, vec2_d mouse, int code, FourthBilliard& billiard) {
+void editScene(GLFWwindow* window, vec2_d mouse, int &code, FourthBilliard& billiard) {
 	// Note: it is important that all the edits of the polygons or the initial values have
 	// to happen using the billiard class since only there we update the scene_has_changed variable
 	
 	// TODO add "thickness" variable to trajectories.
+	// lineWidth does not do anything for trajectory.
 
 	if (code == -1) {
 		ruler.lineWidth = 5.0;
 		ruler.dragDropTo(window, mouse);
 	}
-	else {
-		billiard.updateCoords(mouse, window);
+	else
+	{
+		ruler.lineWidth = 1.0;
 	}
+	
+	billiard.updateCoords(mouse, window);
+	
 
 }
 

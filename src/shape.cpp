@@ -357,6 +357,25 @@ void Poly::center()
 	
 }
 
+void Poly::updateData()
+{
+	bool wasClosed = false;
+	if (closed) {
+		vertexData.pop_back(); // if polygon was closed, we have to manually close it again
+		wasClosed = true;
+	}
+	// this could be done more intelligently, since vertexData is already correct, but this works for now
+	std::vector<vec2> newData = vertexData;
+	Clear();
+	for (auto& vertex : newData) {
+		AddVertex(vec2_d(vertex));
+	}
+	
+	if (wasClosed) {
+		ClosePolygon();
+	}
+}
+
 Line::Line() {
     vertexData.push_back(vec2());
     vertexData.push_back(vec2());

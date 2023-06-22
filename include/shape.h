@@ -106,6 +106,7 @@ public:
 	vec2_d computeCenter();
 	void center();
 	void scaleBy(double scaleFactor);
+	void updateData(); // used to match vertexData_d with vertexData
 };
 
 
