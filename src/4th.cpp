@@ -24,11 +24,6 @@
 
 // settings
 
-
-
-
-
-
 Poly	grid;
 Line	xAxis;
 Line	yAxis;

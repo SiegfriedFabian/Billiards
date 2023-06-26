@@ -26,11 +26,10 @@
 # *.la
 # *.a
 # *.lib
-
 # Executables
-*.exe
-*.out
-*.app
+# *.exe
+# *.out
+# *.app
 
 ### VisualStudioCode template
 .vscode/tasks.json
@@ -87,7 +86,7 @@
 # CMake
 cmake-build-*/
 cmake_build/
-build/
+# build/
 
 
 # Mongo Explorer plugin

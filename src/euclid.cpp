@@ -26,7 +26,7 @@
 
 double t_0 = 0.5;
 double t_1 = 1.2478926389764982736;
-SymplecticBilliardSystem billiard(t_0,  t_1);
+EuclideanBilliardSystem billiard(t_0,  t_1);
 
 
 Poly	grid;
@@ -111,10 +111,10 @@ int main()
 #endif
 
 	// Create a windowed mode window and its OpenGL context
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Symplectic Billiards", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Euclidean Billiards", NULL, NULL);
 	glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
 
-	// GLFWwindow* window_phasespace = glfwCreateWindow(pwidth, pheight, "Symplectic Billiards Phasespace", NULL, NULL);
+	// GLFWwindow* window_phasespace = glfwCreateWindow(pwidth, pheight, "Euclidean Billiards Phasespace", NULL, NULL);
 	// glfwHideWindow(window_phasespace);
 
 	glfwSetWindowAspectRatio(window, SCR_WIDTH, SCR_HEIGHT);
@@ -161,9 +161,9 @@ int main()
 	bool snapP0ToGrid = false;
 	bool snapP1ToGrid = false;
 	bool snapToRuler = false;
-	bool clearPolygon0 = false;
+	bool clearPolygon = false;
 	bool clearPolygon1 = false;
-	bool centerPolygon0 = false;
+	bool centerPolygon = false;
 	bool copyFirstOntoSecond = false;
 	bool copySecondOntoFirst = false;
 	bool editPoly = true;
@@ -212,7 +212,7 @@ int main()
 
 		//---------------------------------------- Billiard ----------------------------------------------------//
 
-		billiard.iterateSymplecticBilliards(batch, nIter);
+		billiard.iterateEuclideanBilliards(batch, nIter);
 		
 		//---------------------------------------- Drawing Scene ----------------------------------------------//
 		
@@ -220,17 +220,13 @@ int main()
 		if(snapP0ToGrid) billiard.snapToGrid();
 		if(snapP1ToGrid) billiard.snapToGrid();
 		if(snapToRuler) mouse = projectOntoLine(mouse, ruler);
-		if(copyFirstOntoSecond) billiard.copyPolygon0OntoPolygon1();
-		if(copySecondOntoFirst) billiard.copyPolygon1OntoPolygon0();
-		if(clearPolygon0) {
-			billiard.ClearPolygon0();
-			clearPolygon0 = false;
+
+		if(clearPolygon) {
+			billiard.clearPolygon();
+			clearPolygon = false;
 		}
-		if(clearPolygon1){
-			billiard.ClearPolygon1();
-			clearPolygon1 = false;
-		}
-		// if(centerPolygon0) billiard.polygon0.center();
+
+		if(centerPolygon) billiard.polygon.center();
 
 
 
@@ -250,35 +246,25 @@ int main()
 			ImGui::Checkbox("Show Grid", &show_grid);
 			ImGui::Checkbox("Snap to grid", &snapToGrid);ImGui::SameLine();
 			ImGui::Checkbox("Snap to ruler", &snapToRuler);
-			ImGui::Checkbox("Clear polygon0", &clearPolygon0);ImGui::SameLine();
+			ImGui::Checkbox("Clear polygon", &clearPolygon);ImGui::SameLine();
 			ImGui::Checkbox("Clear polygon1", &clearPolygon1);
-			// ImGui::Checkbox("Center polygon0", &centerPolygon0);
+			// ImGui::Checkbox("Center polygon", &centerPolygon);
 			
 			ImGui::Checkbox("Copy first polygon onto second", &copyFirstOntoSecond);
 			ImGui::Checkbox("Copy second polygon onto first", &copySecondOntoFirst);
 			
-			if (ImGui::Button("Start Symplectic Billiards")) {
+			if (ImGui::Button("Start Euclidean Billiards")) {
 				billiard.reset();
 			}
-			ImGui::InputInt("Edges of Polygon 0", &nRegular0, 1);
-			if (ImGui::Button("Make polygon0 regular")) {
-				billiard.polygon0.makeRegularNPoly(nRegular0);
+			ImGui::InputInt("Edges of Polygon", &nRegular0, 1);
+			if (ImGui::Button("Make polygon regular")) {
+				billiard.polygon.makeRegularNPoly(nRegular0);
+			}
+			ImGui::InputInt("Spikes of Polygon", &nRegular0, 1);
+			if (ImGui::Button("Make polygon starshaped")) {
+				billiard.polygon.makeRegularNStar(nRegular0);
 			}
 
-			ImGui::InputInt("Edges of Polygon 1", &nRegular1, 1);
-			if (ImGui::Button("Make polygon1 regular")) {
-				billiard.polygon1.makeRegularNPoly(nRegular1);
-			}
-
-			ImGui::InputInt("Spikes of Polygon 0", &nRegular0, 1);
-			if (ImGui::Button("Make polygon0 starshaped")) {
-				billiard.polygon0.makeRegularNStar(nRegular0);
-			}
-
-			ImGui::InputInt("Spikes of Polygon 1", &nRegular1, 1);
-			if (ImGui::Button("Make polygon1 starshaped")) {
-				billiard.polygon1.makeRegularNStar(nRegular1);
-			}
 			ImGui::Text("Drag and drop whole objects (right-mouse or  two-finger press for Mac):");
 			ImGui::RadioButton("Translate polygons", &code, 0);ImGui::SameLine();
 			// ImGui::RadioButton("Translate polygon1", &code, 1);
@@ -286,8 +272,7 @@ int main()
 
 			ImGui::Text("Drag and drop vertices of objects (right-mouse or two-finger press for Mac):");
 			ImGui::RadioButton("Polygons", &code, 4); ImGui::SameLine();
-			ImGui::RadioButton("polygon0", &code, 5); ImGui::SameLine();
-			ImGui::RadioButton("polygon1", &code, 6); 
+			ImGui::RadioButton("polygon", &code, 5); ImGui::SameLine(); 
 			ImGui::RadioButton("Ruler", &code, 7);
 			
 			glfwGetCursorPos(window, &rawMouseX, &rawMouseY);
@@ -303,13 +288,12 @@ int main()
 			// Slider that appears in the window
 			// ImGui::InputFloat("x0", &tInit.x, 0.001f, polygon.directions.size(), "%.6f");
 			// ImGui::InputFloat("x1", &tInit.y, 0.001f, polygon.directions.size(), "%.6f");
-			ImGui::InputDouble("t0", &billiard.t0, 0.001f, billiard.polygon0.directions_d.size());
-			// ImGui::SliderFloat("t1", &billiard.t1, 0.001f, billiard.polygon1.directions_d.size());
+			// ImGui::SliderFloat("t1", &billiard.t1, 0.001f, billiard..directions_d.size());
 			ImGui::InputInt("Number of iterations", &nIter, 1);
 			ImGui::InputInt("Batch", &batch, 1);
-			for (int i = 0; i < billiard.polygon1.directions_d.size(); i++)
+			for (int i = 0; i < billiard.polygon.directions_d.size(); i++)
 			{
-				ImGui::InputFloat2(("Vertex #"+std::to_string(i)).c_str(), &billiard.polygon1.vertexData[i].x);
+				ImGui::InputFloat2(("Vertex #"+std::to_string(i)).c_str(), &billiard.polygon.vertexData[i].x);
 			}
 
 
@@ -327,8 +311,7 @@ int main()
 			ImGui::ColorEdit3("x-Axis", &xAxis.color.x);
 			ImGui::ColorEdit3("y-Axis", &yAxis.color.x);
 			
-			ImGui::ColorEdit3("Polygon0", &billiard.polygon0Color.x);
-			ImGui::ColorEdit3("Polygon1", &billiard.polygon1Color.x);
+			ImGui::ColorEdit3("Polygon", &billiard.polygonColor.x);
 			ImGui::SameLine(); HelpMarker(
         "Save/Revert in local non-persistent storage. Default Colors definition are not affected. "
         "Use \"Export\" below to save them somewhere.");
@@ -355,7 +338,7 @@ int main()
 		ruler.Draw(shaderProgram);
 		xAxis.Draw(shaderProgram);
 		yAxis.Draw(shaderProgram);
-		billiard.drawPolygons(shaderProgram);
+		billiard.drawPolygon(shaderProgram);
 		billiard.drawTrajectories(shaderProgram);
 		billiard.drawInitialValues(shaderProgram);
 		editScene(window, mouse, code);
@@ -415,12 +398,8 @@ void onInitialization() {
 	ruler.lineWidth = 30;
 	ruler.color = vec3(0.7, 0.7, 0.7);
 
-	billiard.polygon0Color = vec3(216.0/255.0,27.0/255.0,96.0/255.0);
-	billiard.polygon1Color = vec3(30.0/255.0,136.0/255.0,229.0/255.0);
+	billiard.polygonColor = vec3(216.0/255.0,27.0/255.0,96.0/255.0);
 	
-	billiard.x0.color = vec3(0.8,0.,0.);
-	billiard.x1.color = vec3(0.0,0.8,0.);
-
 	// Adding all the lines of the scene
 	ruler.Create();
 	xAxis.Create();
@@ -456,62 +435,56 @@ void editScene(GLFWwindow* window, vec2_d mouse, int code){
 		case 0:
 			if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 			{
-				billiard.centerPolygonsAt(mouse);
+				billiard.centerPolygonAt(mouse);
 			}
 			break;
 
 		// case 1:
 		// 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) 
 		// 	{
-		// 		billiard.translatepolygon1(mouseDelta);
+		// 		billiard.translate(mouseDelta);
 		// 	}
 		// 	break;
-		case 2:
-			billiard.x0.size = 20.0;
-			billiard.x1.size = 20.0;
-			ruler.lineWidth = 5.0;
-			billiard.polygon0.lineWidth = 1.0;
-			billiard.polygon1.lineWidth = 1.0;
-			billiard.editVertexPositionX0X1(window, mouse);
-			break;
-		// case 3:
-		// 	billiard.x0.size = 10.0;
-		// 	billiard.x1.size = 20.0;
+		// case 2:
 		// 	ruler.lineWidth = 5.0;
-		// 	billiard.polygon0.lineWidth = 1.0;
-		// 	billiard.polygon1.lineWidth = 1.0;
-		// 	billiard.editVertexPositionX1(window, mouse);
+		// 	billiard.polygon.lineWidth = 1.0;
+		// 	billiard.editVertexPositionX0X1(window, mouse);
 		// 	break;
-		case 4:
-			billiard.x0.size = 10.0;
-			billiard.x1.size = 10.0;
-			ruler.lineWidth = 1.0;
-			billiard.polygon0.lineWidth = 5.0;
-			billiard.polygon1.lineWidth = 1.0;
-			billiard.editVertexPositionPolygons(window, mouse);
-			break;
-		case 5:
-			billiard.x0.size = 10.0;
-			billiard.x1.size = 10.0;
-			ruler.lineWidth = 1.0;
-			billiard.polygon0.lineWidth = 5.0;
-			billiard.polygon1.lineWidth = 1.0;
-			billiard.editVertexPositionpolygon0(window, mouse);			
-			break;
-		case 6:
-			billiard.x0.size = 10.0;
-			billiard.x1.size = 10.0;
-			ruler.lineWidth = 1.0;
-			billiard.polygon0.lineWidth = 1.0;
-			billiard.polygon1.lineWidth = 5.0;
-			billiard.editVertexPositionpolygon1(window, mouse);			
-			break;
+		// // case 3:
+		// // 	billiard.x0.size = 10.0;
+		// // 	billiard.x1.size = 20.0;
+		// // 	ruler.lineWidth = 5.0;
+		// // 	billiard.polygon.lineWidth = 1.0;
+		// // 	billiard.polygon1.lineWidth = 1.0;
+		// // 	billiard.editVertexPositionX1(window, mouse);
+		// // 	break;
+		// case 4:
+		// 	billiard.x0.size = 10.0;
+		// 	billiard.x1.size = 10.0;
+		// 	ruler.lineWidth = 1.0;
+		// 	billiard.polygon.lineWidth = 5.0;
+		// 	billiard.polygon1.lineWidth = 1.0;
+		// 	billiard.editVertexPositionPolygons(window, mouse);
+		// 	break;
+		// case 5:
+		// 	billiard.x0.size = 10.0;
+		// 	billiard.x1.size = 10.0;
+		// 	ruler.lineWidth = 1.0;
+		// 	billiard.polygon.lineWidth = 5.0;
+		// 	billiard.polygon1.lineWidth = 1.0;
+		// 	billiard.editVertexPositionpolygon(window, mouse);			
+		// 	break;
+		// case 6:
+		// 	billiard.x0.size = 10.0;
+		// 	billiard.x1.size = 10.0;
+		// 	ruler.lineWidth = 1.0;
+		// 	billiard.polygon.lineWidth = 1.0;
+		// 	billiard.polygon1.lineWidth = 5.0;
+		// 	billiard.editVertexPositionpolygon1(window, mouse);			
+		// 	break;
 		case 7:
-			billiard.x0.size = 10.0;
-			billiard.x1.size = 20.0;
 			ruler.lineWidth = 5.0;
-			billiard.polygon0.lineWidth = 1.0;
-			billiard.polygon1.lineWidth = 1.0;
+			billiard.polygon.lineWidth = 1.0;
 			ruler.dragDropTo(window, mouse);
 			break;
 		}

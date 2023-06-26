@@ -3,8 +3,17 @@
 #include "shape.h"
 #include <utility>
 
+struct lightSource{
+public:
+	Points p;
+	std::vector<vec2> rays;
 
-struct SymplecticBilliardSystem
+	lightSource(int n);
+};
+
+
+
+struct EuclideanBilliardSystem
 {
 public:
 	Poly					polygon;
@@ -15,57 +24,37 @@ public:
 
 	int mode=0;
 
-	SymplecticBilliardSystem();
-	SymplecticBilliardSystem(double t0, double t1); //Constructor that sets initial values
+	EuclideanBilliardSystem();
+	EuclideanBilliardSystem(vec2_d pos, vec2_d direction); //Constructor that sets initial values
 	void Create();
 	// void addTrajectory(vec2_d start, vec3 color);
 	void reset();
 	// void setInitialValues(double t0, double t1);
-	void iterateSymplecticBilliards(int batch, int nIter);
+	void iterateEuclideanBilliards(int batch, int nIter);
 
 	// change current starting points and polygon dependant on mode and mouse position
 	void updateCoords(vec2_d mouse, GLFWwindow* window);
 
-	void translatepolygon0(vec2_d &deltaPos);
-	void translatepolygon1(vec2_d &deltaPos);
-	void translatepolygons(vec2_d &mouse, vec2_d &deltaPos);
+	void translatepolygon(vec2_d &deltaPos);
 
-	void centerPolygonsAt(vec2_d mouse);
+	void centerPolygonAt(vec2_d mouse);
 
 	// bool polygon0And2Closed();
 
-	void closepolygon0();
-	void closepolygon1();
-	void closepolygon0And2();
+	void closepolygon();
+	void clearPolygon();
 
 
-	void ClearPolygon0();
-	void ClearPolygon1();
-	void copyPolygon0OntoPolygon1();
-	void copyPolygon1OntoPolygon0();
-
-	void editVertexPositionPolygons(GLFWwindow *window, vec2_d& pos);
-	void editVertexPositionpolygon0(GLFWwindow *window, vec2_d& pos);
-	void editVertexPositionpolygon1(GLFWwindow *window, vec2_d& pos);
+	void editVertexPositionPolygon(GLFWwindow *window, vec2_d& pos);
 	void editVertexPositionX0(GLFWwindow *window, vec2_d& pos);
 	void editVertexPositionX1(GLFWwindow *window, vec2_d& pos);
-	void editVertexPositionX0X1(GLFWwindow *window, vec2_d& pos);
-
-	void snapToGridpolygon0();
-	void snapToGridpolygon1();
 	void snapToGrid();
-
-	void drawPolygons(Shader& shaderProgram);
-	// void drawPolygons(Shader& shaderProgram, vec3& p0Color, vec3& p1Color);
+	void drawPolygon(Shader& shaderProgram);
+	void drawPolygon(Shader& shaderProgram, vec3& p0Color, vec3& p1Color);
 	void drawInitialValues(Shader& shaderProgram);
 	void drawTrajectories(Shader& shaderProgram);
-
 	std::vector<vec2_d> getStartPoints();
-
-	void clearpolygon0();
-	void clearpolygon1();
-	void clearPolygons();
 	void resetTrajectories();
 };
 
-vec2_d SymplecticBilliardMap(Poly polygon0, double t0, Poly polygon1, double t1); 
+vec2_d EuclideanBilliardMap(Poly polygon0, double t0, Poly polygon1, double t1); 
