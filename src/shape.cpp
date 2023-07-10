@@ -208,6 +208,12 @@ vec2_d Poly::ParamEdgeRatio(double t){
 		return tlin * vertexData_d[edgeIndex + 1] + (1.0f - tlin) * vertexData_d[edgeIndex];
 	}
 
+vec2_d Poly::ParamLength(double t){
+		t = fmod(t,1);
+		
+        return vec2_d();
+    }
+
 void Poly::ClosePolygon(){
 		if (!closed) {
 			vertexData.push_back(vertexData[0]);

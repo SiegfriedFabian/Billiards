@@ -72,4 +72,4 @@ public:
 	void resetTrajectories();
 };
 
-vec2_d SymplecticBilliardMap(Poly polygon0, double t0, Poly polygon1, double t1); 
+vec2_d SymplecticBilliardMap(Poly polygon0, double t0, Poly polygon1, double t1, bool param_edge_ratio); 

@@ -1,10 +1,15 @@
 #include "SymplecticBilliard.h"
 #include "shape.h"
-vec2_d SymplecticBilliardMap(Poly polygon0, double t0, Poly polygon1, double t1){
+vec2_d SymplecticBilliardMap(Poly polygon0, double t0, Poly polygon1, double t1, bool param_edge_ratio = true){
 		if (!(polygon0.closed && polygon1.closed) || abs(t1 - int(t1)) <  10e-5) {
 		return {t0, t1}; // Polygon has to be closed
 	}
-	vec2_d x = polygon0.ParamEdgeRatio(t0);
+	vec2_d x;
+	if(param_edge_ratio){
+		x = polygon0.ParamEdgeRatio(t0);
+	} else{
+		x = polygon0.ParamLength(t0);
+	}
 	vec2_d dirX = polygon0.directions_d[int(floorf(t0))];
 	vec2_d dirY = polygon1.directions_d[int(floorf(t1))];
 	float signf = det(dirX, dirY);

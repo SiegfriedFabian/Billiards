@@ -85,7 +85,8 @@ public:
 
 	void AddVertex(vec2_d p);
 	vec2_d ParamEdgeRatio(double t);
-
+	vec2_d ParamLength(double t);
+	
 	void ClosePolygon();
 
 	void Clear();
