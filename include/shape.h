@@ -36,6 +36,31 @@ IndexDistPair computeClosestIndex(const std::vector<vec2_d>& vertices, const vec
 // Distance of p to a line segment a---b
 double sdSegment(const vec2_d p, const vec2_d a, const vec2_d b);
 
+
+struct Rectangle{
+	public:
+	        //////////////////Creation of the drawing Buffer and the texture to be drawn in///////////////////////////////
+    GLuint textureFBO;
+    GLuint texture;
+
+    GLfloat vertices[12] = {
+         1.0f,  0.0f,-1.0f,  // Top Right       
+         1.0f,  0.0f, 1.0f,  // Bottom Right    
+        -1.0f,  0.0f, 1.0f,  // Bottom Left     
+        -1.0f,  0.0f,-1.0f,  // Top Left        
+    };
+
+    GLuint indices[6] = {  
+        0, 1, 2,  // First Triangle
+        2, 3, 0,  // Second Triangle
+    };
+
+	GLuint VBO, VAO, EBO;
+	
+	void create(float width, float height);
+    void draw(Shader &shaderprogram, float width, float height, vec2* vertices); 
+};
+
 // Shape is a class of basic methods and variables from which we will derive the classes point, line and polygon
 struct shape {
 
@@ -126,7 +151,7 @@ public:
 	void Create();
 
 	void Draw(Shader& shaderProgram);
-	void Draw(Shader &shaderProgram, vec3 &col);
+	void Draw(Shader& shaderProgram, vec3 &col);
 
 	void round();
 	

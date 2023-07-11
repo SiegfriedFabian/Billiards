@@ -181,6 +181,7 @@ int main()
 	//---------------------------------------------------------------------------------------------------------//
 	//------------------------------------ END control Variables ----------------------------------------------//
 	//---------------------------------------------------------------------------------------------------------//
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
@@ -198,7 +199,6 @@ int main()
 		// Camera
 		camera.Inputs(window, 400 * deltaTime);
 		glfwSetScrollCallback(window, scroll_callback);
-		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 		shaderProgram.setUniform(camera.Zoom, "zoom");
 		shaderProgram.setUniform(camera.Position, "cameraPos");
 		shaderProgram.setUniform(float(SCR_HEIGHT) / float(SCR_WIDTH), "x_scale");

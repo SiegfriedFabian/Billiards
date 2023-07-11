@@ -3,6 +3,8 @@
 out vec4 FragColor;
 uniform float width;
 uniform float height;
+// uniform int N = 3;
+// uniform vec2[3] VERTICES;
 
 // void main()
 // {   
@@ -19,7 +21,7 @@ const float SCALE = 25.0;
 // Polygonal table, if you change N, you also have to change the number of
 // vertices in the array.
 const int N = 3;
-const vec2[N] VERTICES = vec2[](
+const vec2[3] VERTICES = vec2[](
     vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
     vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
     vec2(cos(PI * 11./6.), sin(PI * 11./6.))
@@ -91,20 +93,37 @@ bool pointInCircle(in vec2 pt, in Circle circle) {
     return length(pt - circle.center) - circle.radius < 0.;
 }
 
-Ray ccwTangent(in Circle circle, in vec2 pt) {
+/*Ray ccwTangent(in Circle circle, in vec2 pt) {
     float hyp = length(circle.center - pt);
     float theta = atan(pt.y - circle.center.y, pt.x - circle.center.x);
     float dt = acos(circle.radius / hyp);
     vec2 tp = circle.center + circle.radius * vec2(cos(theta - dt), sin(theta - dt));
     return Ray(tp, pt - tp);
+}*/
+
+Ray ccwTangent(in Circle circle, in vec2 pt) {
+    vec2 translatedPos = pt - circle.center;
+	float d2 = dot(translatedPos, translatedPos); // distance squared
+    vec2 resultTranslated = circle.radius * circle.radius / d2 * translatedPos 
+							 - circle.radius / d2 * sqrt(d2 - circle.radius * circle.radius) * vec2(-translatedPos.y, translatedPos.x);
+	return Ray(resultTranslated + circle.center, pt - resultTranslated - circle.center);
 }
 
-Ray cwTangent(in Circle circle, in vec2 pt) {
+
+/*Ray cwTangent(in Circle circle, in vec2 pt) {
     float hyp = length(circle.center - pt);
     float theta = atan(pt.y - circle.center.y, pt.x - circle.center.x);
     float dt = acos(circle.radius / hyp);
     vec2 tp = circle.center + circle.radius * vec2(cos(theta + dt), sin(theta + dt));
     return Ray(tp, pt - tp);
+}*/
+
+Ray cwTangent(in Circle circle, in vec2 pt) {
+    vec2 translatedPos = pt - circle.center;
+	float d2 = dot(translatedPos, translatedPos); // distance squared
+    vec2 resultTranslated = circle.radius * circle.radius / d2 * translatedPos 
+							 + circle.radius / d2 * sqrt(d2 - circle.radius * circle.radius) * vec2(-translatedPos.y, translatedPos.x);
+	return Ray(resultTranslated + circle.center, pt - resultTranslated - circle.center);
 }
 
 // -1 is left, 0 is on, 1 is right
@@ -221,7 +240,7 @@ void main()
     // vec2 image = fourthBilliardMap(mousePos);
     
     if (pointInsideTable(pos)) {
-        FragColor = vec4(1,0,1,1);
+        FragColor = vec4(1,1,1,1);
         return;
     }
     
