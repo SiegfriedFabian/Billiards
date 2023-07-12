@@ -806,3 +806,5 @@ void Rectangle::draw(Shader &shaderprogram, float width, float height, vec2* ver
 
         glBindVertexArray(0);
 }
+
+

@@ -3,8 +3,9 @@
 out vec4 FragColor;
 uniform float width;
 uniform float height;
-// uniform int N = 3;
-// uniform vec2[3] VERTICES;
+uniform int ITERATIONS;
+uniform vec2 VERTICES[100];
+// uniform int N;
 
 // void main()
 // {   
@@ -13,19 +14,19 @@ uniform float height;
 // }
 
 const float PI = 3.141592653589793238;
-const float LINE_THICKNESS = 0.001;
-const int ITERATIONS = 100;
+const float LINE_THICKNESS = 0.005;
+// const int ITERATIONS = 5;
 // Visual scale factor
-const float SCALE = 25.0;
+const float SCALE = 5.0;
 
 // Polygonal table, if you change N, you also have to change the number of
 // vertices in the array.
 const int N = 3;
-const vec2[3] VERTICES = vec2[](
-    vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
-    vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
-    vec2(cos(PI * 11./6.), sin(PI * 11./6.))
-);
+// const vec2[3] VERTICES = vec2[](
+//     vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
+//     vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
+//     vec2(cos(PI * 11./6.), sin(PI * 11./6.))
+// );
 
 // Vector operations
 vec2 project(in vec2 v, in vec2 onto) {
@@ -254,5 +255,7 @@ void main()
     bool singularity = isFutureSingularity(pos, rays);
     if (singularity) {
         FragColor = vec4(0.8, 0.3, 0.1, 1);
-    }
+} else {
+    FragColor = vec4(0,0,0,0.5);
+}
 }

@@ -28,7 +28,21 @@ const double PI = 3.14159265358979323846;
 double rawMouseX;
 double rawMouseY;
 
+vec2 vertices[3] = {
+		vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
+		vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
+		vec2(cos(PI * 11./6.), sin(PI * 11./6.))
+	};
 
+// vec2 vertices[4] = {
+// 		vec2(-1., 1.),
+// 		vec2(-1., -1.),
+// 		vec2(1., -1.),
+// 		vec2(2.,1.)
+// 	};
+
+int N = 3;
+int n_iter = 10;
 
 int nRegular0 = 0;
 int nRegular1 = 0;
@@ -51,7 +65,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 void onInitialization();
 
-void refreshPhasespace(GLuint VAO, GLuint fbo, Shader shaderprogram);
+void refreshPhasespace(GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window);
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
@@ -177,11 +191,7 @@ int main()
 
     // glBindBuffer(GL_ARRAY_BUFFER, 0); 
 
-	vec2 vertices[3] = {
-		vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
-		vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
-		vec2(cos(PI * 11./6.), sin(PI * 11./6.))
-	};
+
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
 
@@ -213,8 +223,10 @@ int main()
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			
 			ImGui::Text("Width, height: (%.0f, %.0f)", float(SCR_WIDTH), float(SCR_HEIGHT));
+			ImGui::InputInt("Edges of Polygon", &n_iter, 3);
+
             if(ImGui::Button("refresh phasespace")){
-                refreshPhasespace(rect.VAO, rect.textureFBO, shaderProgram);
+                refreshPhasespace(rect.VAO, rect.textureFBO, shaderProgram,shaderProgramTex, rect, window);
             }
 
 			// End of imgui
@@ -256,18 +268,68 @@ void keyCallback(GLFWwindow* window){
 
 }
 
-void refreshPhasespace(GLuint VAO, GLuint fbo, Shader shaderprogram){
-    glBindVertexArray(VAO);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glClear(GL_COLOR_BUFFER_BIT);
+void refreshPhasespace(GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
+	int grid = 10;
+	int blockWidth = 2*SCR_WIDTH/grid;
+	int blockHeight = 2*SCR_HEIGHT/grid;
+	// rect.create(SCR_WIDTH, SCR_HEIGHT);
+	for (int i = 0; i < grid; i++)
+	{
+		for (int j = 0; j < grid; j++)
+		{
+			glBindVertexArray(VAO);
+			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+			// glClear(GL_COLOR_BUFFER_BIT);
 
-    shaderprogram.Activate();
-    glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
-    glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
+			glViewport(i*blockWidth, j*blockHeight, blockWidth, blockHeight);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    glBindFramebuffer(GL_FRAMEBUFFER ,0);
+			shaderprogram.Activate();
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
+			shaderprogram.setUniform(vertices, "VERTICES", N);
+			shaderprogram.setUniform(n_iter, "ITERATIONS");
+			shaderprogram.setUniform(N, "N");
+
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+			glBindFramebuffer(GL_FRAMEBUFFER ,0);
+
+	glViewport(0,0,2*SCR_WIDTH, 2*SCR_HEIGHT);
+			// Specify the color of the background
+		// glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.0f);
+		// Clean the back buffer and assign the new color to it
+		glClear(GL_COLOR_BUFFER_BIT);
+		// Tell OpenGL which Shader Program we want to use
+
+        shaderprogramTex.Activate();
+
+		rect.draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT, vertices);
+				// Swap the back buffer with the front buffer
+		glfwSwapBuffers(window);
+		// Take care of all GLFW events
+		glfwPollEvents();
+		}
+		
+	}
+
+			// 	glBindVertexArray(VAO);
+			// glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+			// glClear(GL_COLOR_BUFFER_BIT);
+
+			// glViewport(0, 0, blockWidth, blockHeight);
+
+			// shaderprogram.Activate();
+			// glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
+			// glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
+			// shaderprogram.setUniform(vertices, "VERTICES", N);
+			// shaderprogram.setUniform(n_iter, "ITERATIONS");
+			// shaderprogram.setUniform(N, "N");
+
+			// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			// glBindVertexArray(0);
+			// glBindFramebuffer(GL_FRAMEBUFFER ,0);
+	glViewport(0,0,2*SCR_WIDTH, 2*SCR_HEIGHT);
+	
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)

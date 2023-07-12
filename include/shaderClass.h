@@ -37,8 +37,13 @@ public:
 	void setUniform(const vec4& v, const std::string& name);
 
 	void setUniform(const mat4& mat, const std::string& name);
+    
+	// void setUniform(const std::vector<vec2> &array, const std::string &name);
+	
+	void setUniform(const vec2* array, const std::string &name, int N);
+
 private:
-	// Checks if the different Shaders have compiled properly
+    // Checks if the different Shaders have compiled properly
 	void compileErrors(unsigned int shader, const char* type);
 
 	

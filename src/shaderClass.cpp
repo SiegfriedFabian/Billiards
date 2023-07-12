@@ -180,3 +180,10 @@ void Shader::setUniform(const mat4& mat, const std::string& name) {
 	int location = getLocation(name);
 	if (location >= 0) glUniformMatrix4fv(location, 1, GL_TRUE, mat);
 }
+
+
+void Shader::setUniform(const vec2 *array, const std::string &name, int N)
+{
+	int location = getLocation(name);
+	if (location >= 0) glUniform2fv(location, N, &array[0].x);
+}
