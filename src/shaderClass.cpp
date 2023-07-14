@@ -182,8 +182,13 @@ void Shader::setUniform(const mat4& mat, const std::string& name) {
 }
 
 
-void Shader::setUniform(const vec2 *array, const std::string &name, int N)
+void Shader::setUniform(const vec2 *array, const std::string& name, int N)
 {
 	int location = getLocation(name);
 	if (location >= 0) glUniform2fv(location, N, &array[0].x);
+}
+void Shader::setUniform(std::vector<vec2>& vertexData, const std::string& name, int N)
+{
+	int location = getLocation(name);
+	if (location >= 0) glUniform2fv(location, N, &vertexData[0].x);
 }

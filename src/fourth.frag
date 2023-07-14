@@ -3,7 +3,6 @@
 out vec4 FragColor;
 uniform float width;
 uniform float height;
-uniform float zoom;
 uniform int ITERATIONS;
 uniform vec2 VERTICES[100];
 // uniform int N;
@@ -231,7 +230,7 @@ bool isFutureSingularity(in vec2 pt, in Ray[N] rays) {
 }
 
 vec2 pixelToWorld(in vec2 px) {
-    return zoom * 2.0 * (px/vec2(width)
+    return SCALE * 2.0 * (px/vec2(width)
         - vec2(0.5, 0.5 * height / width));
 }
 

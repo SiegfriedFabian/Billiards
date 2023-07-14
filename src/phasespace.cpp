@@ -27,12 +27,20 @@ const double PI = 3.14159265358979323846;
 
 double rawMouseX;
 double rawMouseY;
+float zoom = 1.0;
 
-vec2 vertices[3] = {
-		vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
-		vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
-		vec2(cos(PI * 11./6.), sin(PI * 11./6.))
-	};
+std::vector<vec2> vertexData;
+Poly polygon;
+ 
+// vertices.push_back(vec2(cos(PI *  3./6.), sin(PI *  3./6.)));
+// vertices.push_back(vec2(cos(PI *  7./6.), sin(PI *  7./6.)));
+// vertices.push_back(vec2(cos(PI * 11./6.), sin(PI * 11./6.)));
+
+// vec2 vertices[3] = {
+// 		vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
+// 		vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
+// 		vec2(cos(PI * 11./6.), sin(PI * 11./6.))
+// 	};
 
 // vec2 vertices[4] = {
 // 		vec2(-1., 1.),
@@ -195,7 +203,7 @@ int main()
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
 
-
+		vertexData[0] = vertexData[0] + vec2(0.0001, 0.0001);
 		// Specify the color of the background
 		glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.0f);
 		// Clean the back buffer and assign the new color to it
@@ -205,7 +213,7 @@ int main()
 
         shaderProgramTex.Activate();
 
-		rect.draw(shaderProgramTex, SCR_WIDTH, SCR_HEIGHT, vertices);
+		rect.draw(shaderProgramTex, SCR_WIDTH, SCR_HEIGHT, vertexData);
         
         {
 			ImGui_ImplOpenGL3_NewFrame();
@@ -224,6 +232,7 @@ int main()
 			ImGui::InputInt("Iterations", &n_iter, 1);
 			ImGui::Text("Width, height: (%.0f, %.0f)", float(SCR_WIDTH), float(SCR_HEIGHT));
 			ImGui::InputInt("Edges of Polygon", &n_iter, 3);
+			ImGui::InputFloat("Zoom", &zoom);
 
             if(ImGui::Button("refresh phasespace")){
                 refreshPhasespace(rect.VAO, rect.textureFBO, shaderProgram,shaderProgramTex, rect, window);
@@ -252,6 +261,11 @@ int main()
 
 void onInitialization() {
 	// glLineWidth(1.0f); // width of lines in pixels
+
+	vertexData.push_back(vec2(cos(PI *  3./6.), sin(PI *  3./6.)));
+	vertexData.push_back(vec2(cos(PI *  7./6.), sin(PI *  7./6.)));
+	vertexData.push_back(vec2(cos(PI * 11./6.), sin(PI * 11./6.)));
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glHint(GL_POLYGON_SMOOTH, GL_NICEST);
@@ -286,9 +300,10 @@ void refreshPhasespace(GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shad
 			shaderprogram.Activate();
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
-			shaderprogram.setUniform(vertices, "VERTICES", N);
+			shaderprogram.setUniform(vertexData, "VERTICES", N);
 			shaderprogram.setUniform(n_iter, "ITERATIONS");
 			shaderprogram.setUniform(N, "N");
+			shaderprogram.setUniform(zoom,"zoom");
 
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
@@ -303,7 +318,7 @@ void refreshPhasespace(GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shad
 
 			shaderprogramTex.Activate();
 
-			rect.draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT, vertices);
+			rect.draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT, vertexData);
 					// Swap the back buffer with the front buffer
 			glfwSwapBuffers(window);
 			// Take care of all GLFW events

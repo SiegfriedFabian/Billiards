@@ -44,10 +44,10 @@ struct Rectangle{
     GLuint texture;
 
     GLfloat vertices[12] = {
-         1.0f,  0.0f,-1.0f,  // Top Right       
-         1.0f,  0.0f, 1.0f,  // Bottom Right    
-        -1.0f,  0.0f, 1.0f,  // Bottom Left     
-        -1.0f,  0.0f,-1.0f,  // Top Left        
+         1.0f, -1.0f, 0.0f,  // Top Right       
+         1.0f,  1.0f, 0.0f,  // Bottom Right    
+        -1.0f,  1.0f, 0.0f,  // Bottom Left     
+        -1.0f, -1.0f, 0.0f,  // Top Left        
     };
 
     GLuint indices[6] = {  
@@ -58,8 +58,7 @@ struct Rectangle{
 	GLuint VBO, VAO, EBO;
 	
 	void create(float width, float height);
-    void draw(Shader &shaderprogram, float width, float height, std::vector<vec2> *vertices);
-    void draw(Shader &shaderprogram, float width, float height, vec2 *vertices);
+    void draw(Shader &shaderprogram, float width, float height, std::vector<vec2>& vertexData);
 };
 
 // Shape is a class of basic methods and variables from which we will derive the classes point, line and polygon

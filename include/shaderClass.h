@@ -42,6 +42,8 @@ public:
 	
 	void setUniform(const vec2* array, const std::string &name, int N);
 
+	void setUniform(std::vector<vec2> &vertexData, const std::string& name, int N);
+
 private:
     // Checks if the different Shaders have compiled properly
 	void compileErrors(unsigned int shader, const char* type);

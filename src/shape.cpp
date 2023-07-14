@@ -791,14 +791,14 @@ void Rectangle::create(float width, float height)
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
 }
 
-void Rectangle::draw(Shader &shaderprogram, float width, float height, vec2* vertices)
+void Rectangle::draw(Shader &shaderprogram, float width, float height, std::vector<vec2>& vertexData)
 {
 	    glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(glGetUniformLocation(shaderprogram.ID, "phasespace"), 0);
         glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*width);
         glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*height);
-		glUniform2fv(glGetUniformLocation(shaderprogram.ID, "VERTICES"), 6, &vertices[0].x);
+		glUniform2fv(glGetUniformLocation(shaderprogram.ID, "VERTICES"), 6, &vertexData[0].x);
         
         glBindVertexArray(VAO);
 

@@ -24,12 +24,13 @@
 
 // settings
 
-Poly	grid;
-Line	xAxis;
-Line	yAxis;
-Line	ruler;
+Poly		grid;
+Line		xAxis;
+Line		yAxis;
+Line		ruler;
+Rectangle 	rect;
 
-vec2_d mouse;
+vec2_d 		mouse;
 
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
@@ -68,6 +69,16 @@ void main()
 {
 	FragColor = vec4(color, 1.0);
 })";
+
+const char* fileVertexFourth = "../src/fourth.vert";
+const char* fileFragmentFourth = "../src/fourth.frag";
+const std::string vertexShaderFourth = get_file_contents(fileVertexFourth);
+const std::string fragmentShaderFourth = get_file_contents(fileFragmentFourth);
+
+const char* fileVertexShaderTex = "../src/loadTexture.vert";
+const char* fileFragmentShaderTex = "../src/loadTexture.frag";
+const std::string vertexShaderSourceTex = get_file_contents(fileVertexShaderTex);
+const std::string fragmentShaderSourceTex = get_file_contents(fileFragmentShaderTex);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -132,6 +143,11 @@ int main()
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram(vertexShaderSource, fragmentShaderSource);
 
+		// Generates Shader object using shaders default.vert and default.frag
+	Shader shaderProgramFourth(vertexShaderFourth.c_str(), fragmentShaderFourth.c_str());
+	Shader shaderProgramTex(vertexShaderSourceTex.c_str(), fragmentShaderSourceTex.c_str());
+
+
 	onInitialization();
 
 	//imgui stuff
@@ -185,6 +201,7 @@ int main()
 
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
+
 		mouse = mousePosCoord(window, SCR_WIDTH, SCR_HEIGHT, camera);
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
