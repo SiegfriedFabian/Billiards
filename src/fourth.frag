@@ -1,12 +1,12 @@
-#version 410 core
-// Outputs colors in RGBA
-out vec4 FragColor;
 uniform float width;
 uniform float height;
+// Visual scale factor
+uniform float zoom;
 uniform int ITERATIONS;
 uniform vec2 VERTICES[100];
+uniform vec2 cameraPos;
 // uniform int N;
-
+// const int N = 4;
 // void main()
 // {   
 //     vec2 pos = gl_FragCoord.xy;
@@ -16,16 +16,16 @@ uniform vec2 VERTICES[100];
 const float PI = 3.141592653589793238;
 const float LINE_THICKNESS = 0.005;
 // const int ITERATIONS = 5;
-// Visual scale factor
-const float SCALE = 5.0;
+
+
 
 // Polygonal table, if you change N, you also have to change the number of
 // vertices in the array.
-const int N = 3;
-// const vec2[3] VERTICES = vec2[](
+// const vec2[4] VERTICES = vec2[](
 //     vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
 //     vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
-//     vec2(cos(PI * 11./6.), sin(PI * 11./6.))
+//     vec2(cos(PI * 11./6.), sin(PI * 11./6.)),
+//     vec2(0.0, -1.0)
 // );
 
 // Vector operations
@@ -230,13 +230,17 @@ bool isFutureSingularity(in vec2 pt, in Ray[N] rays) {
 }
 
 vec2 pixelToWorld(in vec2 px) {
-    return SCALE * 2.0 * (px/vec2(width)
+    // float x_scale = height/width;
+    // return (1/zoom)*(vec2(x_scale * (aPos.x - cameraPos.x), aPos.y - cameraPos.y) );
+    return (1/zoom)* 2.0 * (px/vec2(width)
         - vec2(0.5, 0.5 * height / width));
+
 }
+
 
 void main()
 {
-    vec2 pos = pixelToWorld(gl_FragCoord.xy);
+    vec2 pos = (width/height)*(pixelToWorld(gl_FragCoord.xy)) + cameraPos;
     // vec2 mousePos = pixelToWorld(iMouse.xy);
     // vec2 image = fourthBilliardMap(mousePos);
     

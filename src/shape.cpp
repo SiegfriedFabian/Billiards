@@ -751,7 +751,7 @@ inline vec2_d fourthBilliard(const Poly& polygon, const vec2_d& p) {
 // 	return vec2(t1, t2);
 // }
 
-void Rectangle::create(float width, float height)
+void Rectangle::Create(float width, float height)
 {
 	glGenFramebuffers(1, &textureFBO);
 
@@ -791,7 +791,7 @@ void Rectangle::create(float width, float height)
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
 }
 
-void Rectangle::draw(Shader &shaderprogram, float width, float height, std::vector<vec2>& vertexData)
+void Rectangle::Draw(Shader &shaderprogram, float width, float height, std::vector<vec2>& vertexData)
 {
 	    glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);

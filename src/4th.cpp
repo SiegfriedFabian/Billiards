@@ -35,40 +35,40 @@ vec2_d 		mouse;
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
 inline Camera camera(SCR_WIDTH, SCR_HEIGHT, vec2(0.0f, 0.0f));
-
+int n_iter = 2;
 // settings
 
 static int code = 4;
 
-const char* vertexShaderSource = R"(
-#version 330 core
-// Positions/Coordinates
-layout (location = 0) in vec3 aPos;
-// Outputs the color for the Fragment Shader
-out vec3 color;
-// Imports the camera matrix from the main function
-uniform float zoom;
-uniform vec2 cameraPos;
-uniform vec3 vertexColor;
-uniform float x_scale;
-void main()
-{
-	// Outputs the positions/coordinates of all vertices
-	gl_Position = vec4(zoom*(vec3(x_scale * (aPos.x - cameraPos.x), aPos.y - cameraPos.y, 0.0) ), 1);
-	// Assigns the colors from the Vertex Data to "color"
-	color = vertexColor;
-})";
+// const char* vertexShaderSource = R"(
+// #version 330 core
+// // Positions/Coordinates
+// layout (location = 0) in vec3 aPos;
+// // Outputs the color for the Fragment Shader
+// out vec3 color;
+// // Imports the camera matrix from the main function
+// uniform float zoom;
+// uniform vec2 cameraPos;
+// uniform vec3 vertexColor;
+// uniform float x_scale;
+// void main()
+// {
+// 	// Outputs the positions/coordinates of all vertices
+// 	gl_Position = vec4(zoom*(vec3(x_scale * (aPos.x - cameraPos.x), aPos.y - cameraPos.y, 0.0) ), 1);
+// 	// Assigns the colors from the Vertex Data to "color"
+// 	color = vertexColor;
+// })";
 
-const char* fragmentShaderSource = R"(
-#version 330 core
-// Outputs colors in RGBA
-out vec4 FragColor;
-// Inputs the color from the Vertex Shader
-in vec3 color;
-void main()
-{
-	FragColor = vec4(color, 1.0);
-})";
+// const char* fragmentShaderSource = R"(
+// #version 330 core
+// // Outputs colors in RGBA
+// out vec4 FragColor;
+// // Inputs the color from the Vertex Shader
+// in vec3 color;
+// void main()
+// {
+// 	FragColor = vec4(color, 1.0);
+// })";
 
 const char* fileVertexFourth = "../src/fourth.vert";
 const char* fileFragmentFourth = "../src/fourth.frag";
@@ -80,6 +80,11 @@ const char* fileFragmentShaderTex = "../src/loadTexture.frag";
 const std::string vertexShaderSourceTex = get_file_contents(fileVertexShaderTex);
 const std::string fragmentShaderSourceTex = get_file_contents(fileFragmentShaderTex);
 
+const char* fileVertexShaderShapes = "../src/default.vert";
+const char* fileFragmentShaderShapes = "../src/default.frag";
+std::string vertexShaderSourceShapes = get_file_contents(fileVertexShaderShapes);
+std::string fragmentShaderSourceShapes = get_file_contents(fileFragmentShaderShapes);
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 void processInput(GLFWwindow* window);
@@ -90,11 +95,11 @@ void onInitialization();
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-int main();
-
 void editScene(GLFWwindow* window, vec2_d mouse, int& code, FourthBilliard& billiard);
 
 void HelpMarker(const char* desc);
+
+void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int n_iter, GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window);
 
 int main()
 {
@@ -141,10 +146,10 @@ int main()
 #endif
 
 	// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgram(vertexShaderSource, fragmentShaderSource);
+	Shader shaderProgramShapes(vertexShaderSourceShapes.c_str(), fragmentShaderSourceShapes.c_str());
 
 		// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgramFourth(vertexShaderFourth.c_str(), fragmentShaderFourth.c_str());
+	// Shader shaderProgramFourth(vertexShaderFourth.c_str(), fragmentShaderFourth.c_str());
 	Shader shaderProgramTex(vertexShaderSourceTex.c_str(), fragmentShaderSourceTex.c_str());
 
 
@@ -201,6 +206,12 @@ int main()
 
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
+		int numberOfDistinctVertices = billiard.polygon.directions_d.size();
+		std::string completeFragFourth{R"(#version 410 core
+		out vec4 FragColor;)"};
+		completeFragFourth.append("const int N = " + std::to_string(numberOfDistinctVertices) + ";");
+		completeFragFourth.append(fragmentShaderFourth);
+		Shader shaderProgramFourth(vertexShaderFourth.c_str(), completeFragFourth.c_str());
 
 		mouse = mousePosCoord(window, SCR_WIDTH, SCR_HEIGHT, camera);
 		float currentFrame = glfwGetTime();
@@ -211,14 +222,16 @@ int main()
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT);
 		// Tell OpenGL which Shader Program we want to use
-		shaderProgram.Activate();
-
+		shaderProgramTex.Activate();
+		shaderProgramTex.setUniform(camera.Zoom, "zoom");
+		rect.Draw(shaderProgramTex, SCR_WIDTH, SCR_HEIGHT, billiard.polygon.vertexData);
+		shaderProgramShapes.Activate();
 		// Camera
 		camera.Inputs(window, 400 * deltaTime);
 		glfwSetScrollCallback(window, scroll_callback);
-		shaderProgram.setUniform(camera.Zoom, "zoom");
-		shaderProgram.setUniform(camera.Position, "cameraPos");
-		shaderProgram.setUniform(float(SCR_HEIGHT) / float(SCR_WIDTH), "x_scale");
+		shaderProgramShapes.setUniform(camera.Zoom, "zoom");
+		shaderProgramShapes.setUniform(camera.Position, "cameraPos");
+		shaderProgramShapes.setUniform(float(SCR_HEIGHT) / float(SCR_WIDTH), "x_scale");
 
 		//---------------------------------------- Billiard ----------------------------------------------------//
 
@@ -235,12 +248,14 @@ int main()
 		//	clearPolygon = false;
 		//}
 		// Sadly for visibility this had to move up here, before the GUI
-		grid.Draw(shaderProgram);
-		ruler.Draw(shaderProgram);
-		xAxis.Draw(shaderProgram);
-		yAxis.Draw(shaderProgram);
-		billiard.drawPolygon(shaderProgram);
-		billiard.drawTrajectories(shaderProgram);
+		if(show_grid){
+		grid.Draw(shaderProgramShapes);
+		ruler.Draw(shaderProgramShapes);
+		xAxis.Draw(shaderProgramShapes);
+		yAxis.Draw(shaderProgramShapes);
+		}
+		billiard.drawPolygon(shaderProgramShapes);
+		billiard.drawTrajectories(shaderProgramShapes);
 
 		//---------------------------------------- ImGui ----------------------------------------------//
 		{
@@ -255,6 +270,10 @@ int main()
 			ImGui::Begin("Settings");
 			// Text that appears in the window
 			// Checkbox that appears in the window
+			ImGui::InputInt("Number of iterations for discontinuities: ", &n_iter);
+			if(ImGui::Button("refresh phasespace")){
+                refreshPhasespace(billiard, numberOfDistinctVertices, n_iter, rect.VAO, rect.textureFBO, shaderProgramFourth,shaderProgramTex, rect, window);
+            }
 			ImGui::Checkbox("Show Grid", &show_grid);
 			ImGui::Checkbox("Snap to grid", &snapToGrid); ImGui::SameLine();	// DONE currently leads to weird behaviour, since Trajectories are not reset
 			ImGui::Checkbox("Snap to ruler", &snapToRuler);
@@ -389,6 +408,7 @@ int main()
 				ImGui::RenderPlatformWindowsDefault();
 				glfwMakeContextCurrent(backup_current_context);
 			}
+			shaderProgramFourth.Delete();
 		}
 
 
@@ -416,7 +436,7 @@ int main()
 		// Take care of all GLFW events
 		glfwPollEvents();
 	}
-	shaderProgram.Delete();
+	shaderProgramShapes.Delete();
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
 	// Terminate GLFW before ending the program
@@ -461,7 +481,8 @@ void onInitialization() {
 	ruler.color = vec3(0.7, 0.7, 0.7);
 
 
-	// Adding all the lines of the scene
+	// Adding all the objects of the scene
+	rect.Create(SCR_WIDTH, SCR_HEIGHT);
 	ruler.Create();
 	xAxis.Create();
 	yAxis.Create();
@@ -534,4 +555,53 @@ void HelpMarker(const char* desc)
 		ImGui::PopTextWrapPos();
 		ImGui::EndTooltip();
 	}
+}
+
+void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int n_iter, GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
+	int grid = 10;
+	int blockWidth = 2*SCR_WIDTH/grid;
+	int blockHeight = 2*SCR_HEIGHT/grid;
+	// rect.create(SCR_WIDTH, SCR_HEIGHT);
+	// int numberOfDistinctVertices = billiard.polygon.directions_d.size()+1;
+	for (int i = 0; i < grid; i++)
+	{
+		for (int j = 0; j < grid; j++)
+		{
+			glBindVertexArray(VAO);
+			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+			// glClear(GL_COLOR_BUFFER_BIT);
+
+			glViewport(i*blockWidth, j*blockHeight, blockWidth, blockHeight);
+
+			shaderprogram.Activate();
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
+			shaderprogram.setUniform(billiard.polygon.vertexData, "VERTICES", numberOfDistinctVertices);
+			shaderprogram.setUniform(n_iter, "ITERATIONS");
+			shaderprogram.setUniform(numberOfDistinctVertices, "N");
+			shaderprogram.setUniform(camera.Zoom,"zoom");
+			shaderprogram.setUniform(camera.Position, "cameraPos");
+
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+			glBindFramebuffer(GL_FRAMEBUFFER ,0);
+
+			glViewport(0,0,2*SCR_WIDTH, 2*SCR_HEIGHT);
+			// Specify the color of the background
+			// glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.0f);
+			// Clean the back buffer and assign the new color to it
+			glClear(GL_COLOR_BUFFER_BIT);
+			// Tell OpenGL which Shader Program we want to use
+
+			shaderprogramTex.Activate();
+
+			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT, billiard.polygon.vertexData);
+					// Swap the back buffer with the front buffer
+			glfwSwapBuffers(window);
+			// Take care of all GLFW events
+			glfwPollEvents();
+		}
+		
+	}
+	glViewport(0,0,2*SCR_WIDTH, 2*SCR_HEIGHT);	
 }

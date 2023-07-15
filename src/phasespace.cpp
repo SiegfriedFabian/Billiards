@@ -27,42 +27,25 @@ const double PI = 3.14159265358979323846;
 
 double rawMouseX;
 double rawMouseY;
-float zoom = 1.0;
+float zoom = 0.5;
 
-std::vector<vec2> vertexData;
 Poly polygon;
- 
-// vertices.push_back(vec2(cos(PI *  3./6.), sin(PI *  3./6.)));
-// vertices.push_back(vec2(cos(PI *  7./6.), sin(PI *  7./6.)));
-// vertices.push_back(vec2(cos(PI * 11./6.), sin(PI * 11./6.)));
 
-// vec2 vertices[3] = {
-// 		vec2(cos(PI *  3./6.), sin(PI *  3./6.)),
-// 		vec2(cos(PI *  7./6.), sin(PI *  7./6.)),
-// 		vec2(cos(PI * 11./6.), sin(PI * 11./6.))
-// 	};
-
-// vec2 vertices[4] = {
-// 		vec2(-1., 1.),
-// 		vec2(-1., -1.),
-// 		vec2(1., -1.),
-// 		vec2(2.,1.)
-// 	};
-
-int N = 3;
+int N = 4;
 int n_iter = 10;
-
-int nRegular0 = 0;
-int nRegular1 = 0;
-
 
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
 
-const char* fileVertexShader = "../src/default.vert";
-const char* fileFragmentShader = "../src/default.frag";
-const std::string vertexShaderSource = get_file_contents(fileVertexShader);
-const std::string fragmentShaderSource = get_file_contents(fileFragmentShader);
+const char* fileVertexShader = "../src/fourth.vert";
+const char* fileFragmentShader = "../src/fourth.frag";
+std::string vertexShaderSource = get_file_contents(fileVertexShader);
+std::string fragmentShaderSource = get_file_contents(fileFragmentShader);
+
+const char* fileVertexShaderShapes = "../src/default.vert";
+const char* fileFragmentShaderShapes = "../src/default.frag";
+std::string vertexShaderSourceShapes = get_file_contents(fileVertexShaderShapes);
+std::string fragmentShaderSourceShapes = get_file_contents(fileFragmentShaderShapes);
 
 const char* fileVertexShaderTex = "../src/loadTexture.vert";
 const char* fileFragmentShaderTex = "../src/loadTexture.frag";
@@ -125,8 +108,9 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgram(vertexShaderSource.c_str(), fragmentShaderSource.c_str());
+	// Shader shaderProgram(vertexShaderSource.c_str(), fragmentShaderSource.c_str());
 	Shader shaderProgramTex(vertexShaderSourceTex.c_str(), fragmentShaderSourceTex.c_str());
+	Shader shaderProgramShapes(vertexShaderSourceShapes.c_str(), fragmentShaderSourceShapes.c_str());
 
 	onInitialization();
 
@@ -142,78 +126,31 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 410");
 	Rectangle rect;
-	rect.create(SCR_WIDTH, SCR_HEIGHT);
-    //     //////////////////Creation of the drawing Buffer and the texture to be drawn in///////////////////////////////
-    // GLuint textureFBO;
-    // GLuint texture;
-    
-    // glGenFramebuffers(1, &textureFBO);
-
-    // glGenTextures(1, &texture);
-    // glBindTexture(GL_TEXTURE_2D, texture);
-
-    
-    // glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB,  2*SCR_WIDTH,  2*SCR_HEIGHT, 0,GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-    // glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-    
-    // glDrawBuffer(GL_FRONT_AND_BACK);
-    // glReadBuffer(GL_FRONT_AND_BACK);
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // ///////////////////////////////////////
-    // ///////////////////////////////////////
-    // ///////////////////////////////////////
-    // ///////////////////////////////////////
-    //     GLfloat vertices[] = {
-    //      1.0f,  0.0f,-1.0f,  // Top Right       
-    //      1.0f,  0.0f, 1.0f,  // Bottom Right    
-    //     -1.0f,  0.0f, 1.0f,  // Bottom Left     
-    //     -1.0f,  0.0f,-1.0f,  // Top Left        
-    // };
-
-    // GLuint indices[] = {  
-    //     0, 1, 2,  // First Triangle
-    //     2, 3, 0,  // Second Triangle
-    // };
-
-    // GLuint VBO, VAO, EBO;
-    // glGenVertexArrays(1, &VAO);
-    // glGenBuffers(1, &VBO);
-    // glGenBuffers(1, &EBO);
-
-    // glBindVertexArray(VAO); 
-    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
-
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);  
-
-    // glEnableVertexAttribArray(0);
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);   
-
-    // glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
-
+	rect.Create(SCR_WIDTH, SCR_HEIGHT);
+ 
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
+		std::string completeFragSource{R"(#version 410 core
+		out vec4 FragColor;)"};
+		completeFragSource.append("const int N = " + std::to_string(N) + ";");
+		completeFragSource.append(fragmentShaderSource);
+		Shader shaderProgramFourth(vertexShaderSource.c_str(), completeFragSource.c_str());
 
-		vertexData[0] = vertexData[0] + vec2(0.0001, 0.0001);
+		polygon.vertexData[0] = polygon.vertexData[0] + vec2(0.0001, 0.0001);
 		// Specify the color of the background
 		glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.0f);
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT);
 		// Tell OpenGL which Shader Program we want to use
-		shaderProgram.Activate();
 
         shaderProgramTex.Activate();
-
-		rect.draw(shaderProgramTex, SCR_WIDTH, SCR_HEIGHT, vertexData);
+		shaderProgramTex.setUniform(zoom, "zoom");
+		rect.Draw(shaderProgramTex, SCR_WIDTH, SCR_HEIGHT, polygon.vertexData);
+		shaderProgramShapes.Activate();
+		shaderProgramShapes.setUniform(zoom, "zoom");
+		shaderProgramShapes.setUniform(float(SCR_HEIGHT) / float(SCR_WIDTH), "x_scale");
+		polygon.Draw(shaderProgramShapes);
+		// polygon.onMouse(shaderProgramShapes, mouse);
         
         {
 			ImGui_ImplOpenGL3_NewFrame();
@@ -231,11 +168,10 @@ int main()
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::InputInt("Iterations", &n_iter, 1);
 			ImGui::Text("Width, height: (%.0f, %.0f)", float(SCR_WIDTH), float(SCR_HEIGHT));
-			ImGui::InputInt("Edges of Polygon", &n_iter, 3);
 			ImGui::InputFloat("Zoom", &zoom);
-
+			ImGui::InputInt("Number of vertices", &N);
             if(ImGui::Button("refresh phasespace")){
-                refreshPhasespace(rect.VAO, rect.textureFBO, shaderProgram,shaderProgramTex, rect, window);
+                refreshPhasespace(rect.VAO, rect.textureFBO, shaderProgramFourth,shaderProgramTex, rect, window);
             }
 
 			// End of imgui
@@ -250,8 +186,9 @@ int main()
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
 		glfwPollEvents();
+		shaderProgramFourth.Delete();
 	}
-	shaderProgram.Delete();
+	shaderProgramTex.Delete();
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
 	// Terminate GLFW before ending the program
@@ -260,11 +197,13 @@ int main()
 }
 
 void onInitialization() {
-	// glLineWidth(1.0f); // width of lines in pixels
-
-	vertexData.push_back(vec2(cos(PI *  3./6.), sin(PI *  3./6.)));
-	vertexData.push_back(vec2(cos(PI *  7./6.), sin(PI *  7./6.)));
-	vertexData.push_back(vec2(cos(PI * 11./6.), sin(PI * 11./6.)));
+	glLineWidth(1.0f); // width of lines in pixels
+	polygon.Create();
+	polygon.vertexData.push_back(vec2(cos(PI *  3./6.), sin(PI *  3./6.)));
+	polygon.vertexData.push_back(vec2(cos(PI *  7./6.), sin(PI *  7./6.)));
+	polygon.vertexData.push_back(vec2(cos(PI *  3./6.), -sin(PI *  3./6.)));
+	polygon.vertexData.push_back(vec2(cos(PI * 11./6.), sin(PI * 11./6.)));
+	polygon.color = vec3(0.0,1.0, 0.1);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -300,7 +239,7 @@ void refreshPhasespace(GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shad
 			shaderprogram.Activate();
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
-			shaderprogram.setUniform(vertexData, "VERTICES", N);
+			shaderprogram.setUniform(polygon.vertexData, "VERTICES", N);
 			shaderprogram.setUniform(n_iter, "ITERATIONS");
 			shaderprogram.setUniform(N, "N");
 			shaderprogram.setUniform(zoom,"zoom");
@@ -318,7 +257,7 @@ void refreshPhasespace(GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shad
 
 			shaderprogramTex.Activate();
 
-			rect.draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT, vertexData);
+			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT, polygon.vertexData);
 					// Swap the back buffer with the front buffer
 			glfwSwapBuffers(window);
 			// Take care of all GLFW events
