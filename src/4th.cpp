@@ -565,8 +565,14 @@ void HelpMarker(const char* desc)
 
 void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int n_iter, GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
 	int grid = 10;
+#ifdef __APPLE__
 	int blockWidth = 2*SCR_WIDTH/grid;
 	int blockHeight = 2*SCR_HEIGHT/grid;
+#else
+	int blockWidth = SCR_WIDTH/grid;
+	int blockHeight = SCR_HEIGHT/grid;
+#endif
+
 	// rect.create(SCR_WIDTH, SCR_HEIGHT);
 	// int numberOfDistinctVertices = billiard.polygon.directions_d.size()+1;
 	for (int i = 0; i < grid; i++)
@@ -592,8 +598,11 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 			glBindFramebuffer(GL_FRAMEBUFFER ,0);
-
+#if __APPLE__
 			glViewport(0,0,2*SCR_WIDTH, 2*SCR_HEIGHT);
+#else
+			glViewport(0,0,SCR_WIDTH, SCR_HEIGHT);
+#endif
 			// Specify the color of the background
 			// glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.0f);
 			// Clean the back buffer and assign the new color to it
@@ -609,5 +618,9 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 		}
 		
 	}
+#if __APPLE__
 	glViewport(0,0,2*SCR_WIDTH, 2*SCR_HEIGHT);	
+#else
+	glViewport(0,0,SCR_WIDTH, SCR_HEIGHT);	
+#endif
 }
