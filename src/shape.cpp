@@ -758,8 +758,11 @@ void Rectangle::Create(float width, float height)
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB,  2*width,  2*height, 0,GL_RGB, GL_UNSIGNED_BYTE, NULL);
+#ifdef __APPLE__
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB,  2*width,  2*height, 0,GL_RGB, GL_UNSIGNED_BYTE, NULL);
+#else
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB,  width,  height, 0,GL_RGB, GL_UNSIGNED_BYTE, NULL);
+#endif    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -770,6 +773,10 @@ void Rectangle::Create(float width, float height)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
     
     glDrawBuffer(GL_FRONT_AND_BACK);
+	///////////////////////////////////////////Black init. Somehow its blue otherwise...////////////////
+	GLuint clearColor[4] = {0, 0, 0, 0};
+	glClearBufferuiv(GL_COLOR, 0, clearColor);
+	////////////////////////////////////////////////////////////////////////////////////////////////////
     glReadBuffer(GL_FRONT_AND_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
