@@ -260,6 +260,6 @@ void main()
     if (singularity) {
         FragColor = vec4(0.8, 0.3, 0.1, 1);
 } else {
-    FragColor = vec4(0,0,0,1);
+    FragColor = vec4(0,0,0,1.0);
 }
 }

@@ -101,6 +101,9 @@ void HelpMarker(const char* desc);
 
 void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int n_iter, GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window);
 
+
+
+
 int main()
 {
 	//---------------------------------------------- Window Creation (using GLFW) -----------------------------------------------------------------------//
@@ -224,6 +227,7 @@ int main()
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgramTex.Activate();
 		shaderProgramTex.setUniform(camera.Zoom, "zoom");
+
 		rect.Draw(shaderProgramTex, SCR_WIDTH, SCR_HEIGHT, billiard.polygon.vertexData);
 		shaderProgramShapes.Activate();
 		// Camera
@@ -427,6 +431,7 @@ int main()
 			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ||
 			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
 			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+
 			// billiard.reset();
 			
 		}
@@ -507,6 +512,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	else {
 		camera.Zoom *= 1.0f + yoffset * 0.02;
 	}
+
 }
 
 
@@ -582,6 +588,7 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			shaderprogram.setUniform(camera.Zoom,"zoom");
 			shaderprogram.setUniform(camera.Position, "cameraPos");
 
+
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 			glBindFramebuffer(GL_FRAMEBUFFER ,0);
@@ -594,7 +601,6 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			// Tell OpenGL which Shader Program we want to use
 
 			shaderprogramTex.Activate();
-
 			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT, billiard.polygon.vertexData);
 					// Swap the back buffer with the front buffer
 			glfwSwapBuffers(window);
