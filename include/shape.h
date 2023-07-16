@@ -58,7 +58,7 @@ struct Rectangle{
 	GLuint VBO, VAO, EBO;
 	
 	void Create(float width, float height);
-    void Draw(Shader &shaderprogram, float width, float height, std::vector<vec2>& vertexData);
+    void Draw(Shader &shaderprogram, float width, float height);
 };
 
 // Shape is a class of basic methods and variables from which we will derive the classes point, line and polygon

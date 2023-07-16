@@ -11,5 +11,6 @@ void main()
 {   
     vec2 pos = vec2(gl_FragCoord.x/width, gl_FragCoord.y/height);
 	FragColor = vec4(texture(phasespace, pos).rgb, 1.0);
+	// FragColor = vec4(0.5,0.5,0.5, 1.0);
 }
 

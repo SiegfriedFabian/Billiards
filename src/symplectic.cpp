@@ -23,7 +23,8 @@
 #include"SymplecticBilliard.h"
 
 // settings
-
+bool show_phasespace = 0;
+bool reload_phasespace = 1;
 double t_0 = 0.5;
 double t_1 = 1.2478926389764982736;
 SymplecticBilliardSystem billiard(t_0,  t_1);
@@ -33,6 +34,8 @@ Poly	grid;
 Line	xAxis;
 Line	yAxis;
 Line	ruler;
+
+Rectangle 	rect;
 
 vec2_d mouse;
 
@@ -45,39 +48,33 @@ int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
 inline Camera camera(SCR_WIDTH, SCR_HEIGHT, vec2(0.0f, 0.0f));
 
+int P_SCR_WIDTH = 500;
+int P_SCR_HEIGHT = 500;
 // settings
 
 static int code = 4;
 
-const char* vertexShaderSource = R"(
-#version 330 core
-// Positions/Coordinates
-layout (location = 0) in vec3 aPos;
-// Outputs the color for the Fragment Shader
-out vec3 color;
-// Imports the camera matrix from the main function
-uniform float zoom;
-uniform vec2 cameraPos;
-uniform vec3 vertexColor;
-uniform float x_scale;
-void main()
-{
-	// Outputs the positions/coordinates of all vertices
-	gl_Position = vec4(zoom*(vec3(x_scale * (aPos.x - cameraPos.x), aPos.y - cameraPos.y, 0.0) ), 1);
-	// Assigns the colors from the Vertex Data to "color"
-	color = vertexColor;
-})";
+const char* fileVertexFourth = "../src/fourth.vert";
+const char* fileFragmentFourth = "../src/fourth.frag";
+const std::string vertexShaderFourth = get_file_contents(fileVertexFourth);
+const std::string fragmentShaderFourth = get_file_contents(fileFragmentFourth);
 
-const char* fragmentShaderSource = R"(
-#version 330 core
-// Outputs colors in RGBA
-out vec4 FragColor;
-// Inputs the color from the Vertex Shader
-in vec3 color;
-void main()
-{
-	FragColor = vec4(color, 1.0);
-})";
+const char* fileVertexSymp = "../src/symplectic.vert";
+const char* fileFragmentSymp = "../src/symplectic.frag";
+const std::string vertexShaderSymp = get_file_contents(fileVertexSymp);
+const std::string fragmentShaderSymp = get_file_contents(fileFragmentSymp);
+
+const char* fileVertexShaderTex = "../src/loadTexture.vert";
+const char* fileFragmentShaderTex = "../src/loadTexture.frag";
+const std::string vertexShaderSourceTex = get_file_contents(fileVertexShaderTex);
+const std::string fragmentShaderSourceTex = get_file_contents(fileFragmentShaderTex);
+
+const char* fileVertexShaderShapes = "../src/default.vert";
+const char* fileFragmentShaderShapes = "../src/default.frag";
+std::string vertexShaderSourceShapes = get_file_contents(fileVertexShaderShapes);
+std::string fragmentShaderSourceShapes = get_file_contents(fileFragmentShaderShapes);
+
+void refreshPhasespace(SymplecticBilliardSystem billiard , int n_iter, Shader shaderprogramSymplectic, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window);
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -97,8 +94,11 @@ void HelpMarker(const char* desc);
 
 int main()
 {
+	const char* vertexShaderSympp = vertexShaderSymp.c_str();
+	const char* fragmentShaderSympp = fragmentShaderSymp.c_str();
 	//---------------------------------------------- Window Creation (using GLFW) -----------------------------------------------------------------------//
 	GLFWwindow* window;
+	GLFWwindow* phasespaceWindow;
 	// glfw: initialize and configure
 	glfwInit();
 	// We use OpenGL 3.3 (i.e. Major = 3, Minor = 3)
@@ -114,10 +114,15 @@ int main()
 	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Symplectic Billiards", NULL, NULL);
 	glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
 
+	phasespaceWindow = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Phasespace Symplectic Billiards", NULL, NULL);
+	glfwSetWindowSize(phasespaceWindow, P_SCR_WIDTH, P_SCR_HEIGHT);
+
 	// GLFWwindow* window_phasespace = glfwCreateWindow(pwidth, pheight, "Symplectic Billiards Phasespace", NULL, NULL);
 	// glfwHideWindow(window_phasespace);
 
 	glfwSetWindowAspectRatio(window, SCR_WIDTH, SCR_HEIGHT);
+	glfwSetWindowAspectRatio(phasespaceWindow, P_SCR_WIDTH, P_SCR_HEIGHT);
+
 
 	// Error check if the window fails to create
 	if (window == NULL)
@@ -126,11 +131,28 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
-	// Introduce the window into the current context
+	glfwMakeContextCurrent(phasespaceWindow);
+	gladLoadGL();
+	glClearColor(1.0, 0.0, 0.0, 1.f);
+	
+
+#ifdef __APPLE__
+	glViewport(0, 0, P_SCR_WIDTH*2, P_SCR_HEIGHT*2);
+#else
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+#endif
+	Shader shaderProgramTex(vertexShaderSourceTex.c_str(), fragmentShaderSourceTex.c_str());
+	Shader shaderProgramSymp(vertexShaderSympp, fragmentShaderSympp);
+	rect.Create(P_SCR_WIDTH, P_SCR_HEIGHT);
+
 	glfwMakeContextCurrent(window);
+	gladLoadGL();
+    glClearColor(0.0, 0.0, 0.0, 1.f);
+
+
+	// Introduce the window into the current context
 
 	//Load GLAD so it configures OpenGL
-	gladLoadGL();
 	// Specify the viewport of OpenGL in the Window
 
 #ifdef __APPLE__
@@ -140,7 +162,7 @@ int main()
 #endif
 
 	// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgram(vertexShaderSource, fragmentShaderSource);
+	Shader shaderProgram(vertexShaderSourceShapes.c_str(), fragmentShaderSourceShapes.c_str());
 
 	onInitialization();
 
@@ -199,6 +221,12 @@ int main()
 
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
+		// if(show_phasespace){
+		// 	glfwShowWindow(phasespaceWindow);
+		// } else {
+		// 	glfwHideWindow(phasespaceWindow);
+		// }
+		glfwMakeContextCurrent(window);
 		mouse = mousePosCoord(window, SCR_WIDTH, SCR_HEIGHT, camera);
 
 		float currentFrame = glfwGetTime();
@@ -242,7 +270,24 @@ int main()
 		// if(centerPolygon0) billiard.polygon0.center();
 
 
+		grid.Draw(shaderProgram);
+		ruler.Draw(shaderProgram);
+		xAxis.Draw(shaderProgram);
+		yAxis.Draw(shaderProgram);
+		billiard.drawPolygons(shaderProgram);
+		billiard.drawTrajectories(shaderProgram);
+		billiard.drawInitialValues(shaderProgram);
+		editScene(window, mouse, code);
 
+		if(	glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS || 
+			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS || 
+			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
+			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {billiard.reset();}
+
+
+		// Swap the back buffer with the front buffer
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 		//---------------------------------------- ImGui ----------------------------------------------//
 		{
 			ImGui_ImplOpenGL3_NewFrame();
@@ -256,6 +301,18 @@ int main()
 			ImGui::Begin("Settings");
 			// Text that appears in the window
 			// Checkbox that appears in the window
+			ImGui::Checkbox("Show Phasespace", &show_phasespace);
+			if(ImGui::Button("Refresh Phasespace")){
+				refreshPhasespace(billiard, 100, shaderProgramSymp, shaderProgramTex, rect, phasespaceWindow);
+				glfwMakeContextCurrent(window);
+			}
+			if(ImGui::Button("ShowPhasespace")){
+				glfwShowWindow(phasespaceWindow);
+			}
+			if(ImGui::Button("HidePhasespace")){
+				glfwHideWindow(phasespaceWindow);
+			}
+			ImGui::Checkbox("Show Phasespace", &show_phasespace);
 			ImGui::Checkbox("Show Grid", &show_grid);
 			ImGui::Checkbox("Snap to grid", &snapToGrid);ImGui::SameLine();
 			ImGui::Checkbox("Snap to ruler", &snapToRuler);
@@ -339,8 +396,8 @@ int main()
 			ImGui::ColorEdit3("Polygon0", &billiard.polygon0Color.x);
 			ImGui::ColorEdit3("Polygon1", &billiard.polygon1Color.x);
 			ImGui::SameLine(); HelpMarker(
-        "Save/Revert in local non-persistent storage. Default Colors definition are not affected. "
-        "Use \"Export\" below to save them somewhere.");
+		"Save/Revert in local non-persistent storage. Default Colors definition are not affected. "
+		"Use \"Export\" below to save them somewhere.");
 
 			ImGui::Checkbox("Show Style Editor", &showStyleEditor);
 
@@ -371,29 +428,25 @@ int main()
 		// So, since this changes the scene, we simly reset every time this happens.
 
 
-		grid.Draw(shaderProgram);
-		ruler.Draw(shaderProgram);
-		xAxis.Draw(shaderProgram);
-		yAxis.Draw(shaderProgram);
-		billiard.drawPolygons(shaderProgram);
-		billiard.drawTrajectories(shaderProgram);
-		billiard.drawInitialValues(shaderProgram);
-		editScene(window, mouse, code);
-
-		if(	glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS || 
-			glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS || 
-			glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS ||
-			glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {billiard.reset();}
 
 
-		// Swap the back buffer with the front buffer
-		glfwSwapBuffers(window);
-		// Take care of all GLFW events
-		glfwPollEvents();
+
+		// 	glfwShowWindow(phasespaceWindow);
+			glfwMakeContextCurrent(phasespaceWindow);
+			glViewport(0,0,2*P_SCR_WIDTH, 2*P_SCR_HEIGHT);
+			glClear(GL_COLOR_BUFFER_BIT);
+
+					shaderProgramTex.Activate();
+		rect.Draw(shaderProgramTex, P_SCR_WIDTH, P_SCR_HEIGHT);
+
+		glfwSwapBuffers(phasespaceWindow);
+
 	}
 	shaderProgram.Delete();
+	shaderProgramTex.Delete();
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
+	glfwDestroyWindow(phasespaceWindow);
 	// Terminate GLFW before ending the program
 	glfwTerminate();
 	return 0;
@@ -562,4 +615,67 @@ void HelpMarker(const char* desc)
 		ImGui::PopTextWrapPos();
 		ImGui::EndTooltip();
 	}
+}
+
+void refreshPhasespace(SymplecticBilliardSystem billiard , int n_iter, Shader shaderprogramSymplectic, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
+	int grid = 10;
+#ifdef __APPLE__
+	int blockWidth = 2*SCR_WIDTH/grid;
+	int blockHeight = 2*SCR_HEIGHT/grid;
+#else
+	int blockWidth = SCR_WIDTH/grid;
+	int blockHeight = SCR_HEIGHT/grid;
+#endif
+	glfwMakeContextCurrent(window);
+
+	// rect.create(SCR_WIDTH, SCR_HEIGHT);
+	// int numberOfDistinctVertices = billiard.polygon.directions_d.size()+1;
+	for (int i = 0; i < grid; i++)
+	{
+		for (int j = 0; j < grid; j++)
+		{
+			glBindVertexArray(rect.VAO);
+			glBindFramebuffer(GL_FRAMEBUFFER, rect.textureFBO);
+			// glClear(GL_COLOR_BUFFER_BIT);
+
+			glViewport(i*blockWidth, j*blockHeight, blockWidth, blockHeight);
+
+			shaderprogramSymplectic.Activate();
+			// glUniform1f(glGetUniformLocation(shaderprogramSymplectic.ID, "width"), 2*SCR_WIDTH);
+			// glUniform1f(glGetUniformLocation(shaderprogramSymplectic.ID, "height"), 2*SCR_HEIGHT);
+			// shaderprogram.setUniform(billiard.polygon1.vertexData, "VERTICES", numberOfDistinctVertices);
+			// shaderprogram.setUniform(n_iter, "ITERATIONS");
+			// shaderprogram.setUniform(numberOfDistinctVertices, "N");
+			// shaderprogramSymplectic.setUniform(camera.Zoom,"zoom");
+			// shaderprogram.setUniform(camera.Position, "cameraPos");
+
+
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+			glBindFramebuffer(GL_FRAMEBUFFER ,0);
+#if __APPLE__
+			glViewport(0,0,2*SCR_WIDTH, 2*SCR_HEIGHT);
+#else
+			glViewport(0,0,SCR_WIDTH, SCR_HEIGHT);
+#endif
+			// Specify the color of the background
+			// glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.0f);
+			// Clean the back buffer and assign the new color to it
+			glClear(GL_COLOR_BUFFER_BIT);
+			// Tell OpenGL which Shader Program we want to use
+
+			shaderprogramTex.Activate();
+			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT);
+					// Swap the back buffer with the front buffer
+			glfwSwapBuffers(window);
+			// Take care of all GLFW events
+			glfwPollEvents();
+		}
+		
+	}
+#if __APPLE__
+	glViewport(0,0,2*SCR_WIDTH, 2*SCR_HEIGHT);	
+#else
+	glViewport(0,0,SCR_WIDTH, SCR_HEIGHT);	
+#endif
 }

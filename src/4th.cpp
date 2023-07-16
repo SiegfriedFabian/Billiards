@@ -228,7 +228,7 @@ int main()
 		shaderProgramTex.Activate();
 		shaderProgramTex.setUniform(camera.Zoom, "zoom");
 
-		rect.Draw(shaderProgramTex, SCR_WIDTH, SCR_HEIGHT, billiard.polygon.vertexData);
+		rect.Draw(shaderProgramTex, SCR_WIDTH, SCR_HEIGHT);
 		shaderProgramShapes.Activate();
 		// Camera
 		camera.Inputs(window, 400 * deltaTime);
@@ -610,7 +610,7 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			// Tell OpenGL which Shader Program we want to use
 
 			shaderprogramTex.Activate();
-			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT, billiard.polygon.vertexData);
+			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT);
 					// Swap the back buffer with the front buffer
 			glfwSwapBuffers(window);
 			// Take care of all GLFW events
