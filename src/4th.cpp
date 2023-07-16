@@ -35,7 +35,7 @@ vec2_d 		mouse;
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
 inline Camera camera(SCR_WIDTH, SCR_HEIGHT, vec2(0.0f, 0.0f));
-int n_iter = 2;
+int n_iter = 100;
 // settings
 
 static int code = 4;
