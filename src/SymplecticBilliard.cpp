@@ -286,6 +286,24 @@ void SymplecticBilliardSystem::drawTrajectories(Shader &shaderProgram)
 	oddTraj.Draw(shaderProgram, polygon0Color);
 }
 
+void SymplecticBilliardSystem::makeQuads()
+{
+	polygon0.Clear();
+	polygon1.Clear();
+
+	polygon0.AddVertex(vec2_d(0.0, 0.0));
+	polygon0.AddVertex(vec2_d(6.0, 0.0));
+	polygon0.AddVertex(vec2_d(2.0, 4.0));
+	polygon0.AddVertex(vec2_d(0.0, 2.0));
+	polygon0.ClosePolygon();
+	
+	polygon1.AddVertex(vec2_d(0.0, 0.0));
+	polygon1.AddVertex(vec2_d(6.0, 0.0));
+	polygon1.AddVertex(vec2_d(2.0, 4.0));
+	polygon1.AddVertex(vec2_d(0.0, 2.0));
+	polygon1.ClosePolygon();
+}
+
 // void SymplecticBilliardSystem::drawPolygons(Shader &shaderProgram)
 // {
 // 	polygon0.Draw(shaderProgram);

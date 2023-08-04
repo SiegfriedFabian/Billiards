@@ -74,7 +74,7 @@ const char* fileFragmentShaderShapes = "../src/default.frag";
 std::string vertexShaderSourceShapes = get_file_contents(fileVertexShaderShapes);
 std::string fragmentShaderSourceShapes = get_file_contents(fileFragmentShaderShapes);
 
-void refreshPhasespace(SymplecticBilliardSystem billiard , int n_iter, Shader shaderprogramSymplectic, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window);
+void refreshPhasespace(SymplecticBilliardSystem billiard , int &n_iter, Shader shaderprogramSymplectic, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window);
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
@@ -142,7 +142,6 @@ int main()
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 #endif
 	Shader shaderProgramTex(vertexShaderSourceTex.c_str(), fragmentShaderSourceTex.c_str());
-	Shader shaderProgramSymp(vertexShaderSympp, fragmentShaderSympp);
 	rect.Create(P_SCR_WIDTH, P_SCR_HEIGHT);
 
 	glfwMakeContextCurrent(window);
@@ -203,13 +202,14 @@ int main()
 	bool showStyleEditor = false;
 	bool startDynamicalSystem = true;
 
+
 	// Style variable 
 	double rawMouseX, rawMouseY;
 
 	//---------------------------------------- Billiard controls ----------------------------------------------//
 	int batch = 10;
 	int nIter = 100000;
-
+	int nIterPhasespace = 100;
 
 	float deltaTime = 0.0f;	// Time between current frame and last frame
 	float lastFrame = 0.0f; // Time of last frame
@@ -221,6 +221,12 @@ int main()
 
 	while ((!glfwWindowShouldClose(window)) && (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE))
 	{
+		std::string completeFragSymp{R"(#version 410 core
+		out vec4 FragColor;)"};
+		completeFragSymp.append("const int nVerticesZero =" + std::to_string(billiard.polygon0.directions_d.size()) + ";");
+		completeFragSymp.append("const int nVerticesOne =" + std::to_string(billiard.polygon0.directions_d.size()) + ";");
+		completeFragSymp.append(fragmentShaderSymp);
+		Shader shaderProgramSymp(vertexShaderSymp.c_str(), completeFragSymp.c_str());
 		// if(show_phasespace){
 		// 	glfwShowWindow(phasespaceWindow);
 		// } else {
@@ -303,8 +309,11 @@ int main()
 			// Checkbox that appears in the window
 			ImGui::Checkbox("Show Phasespace", &show_phasespace);
 			if(ImGui::Button("Refresh Phasespace")){
-				refreshPhasespace(billiard, 100, shaderProgramSymp, shaderProgramTex, rect, phasespaceWindow);
+				refreshPhasespace(billiard, nIterPhasespace, shaderProgramSymp, shaderProgramTex, rect, phasespaceWindow);
 				glfwMakeContextCurrent(window);
+			}
+			if(ImGui::Button("Example: Quad")){
+				billiard.makeQuads();
 			}
 			if(ImGui::Button("ShowPhasespace")){
 				glfwShowWindow(phasespaceWindow);
@@ -372,6 +381,7 @@ int main()
 			ImGui::InputDouble("t0", &billiard.t0, 0.001f, billiard.polygon0.directions_d.size());
 			// ImGui::SliderFloat("t1", &billiard.t1, 0.001f, billiard.polygon1.directions_d.size());
 			ImGui::InputInt("Number of iterations", &nIter, 1);
+			ImGui::InputInt("Number of iterations Phasespace", &nIterPhasespace, 1);
 			ImGui::InputInt("Batch", &batch, 1);
 			for (int i = 0; i < billiard.polygon1.directions_d.size(); i++)
 			{
@@ -436,8 +446,8 @@ int main()
 			glViewport(0,0,2*P_SCR_WIDTH, 2*P_SCR_HEIGHT);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-					shaderProgramTex.Activate();
-		rect.Draw(shaderProgramTex, P_SCR_WIDTH, P_SCR_HEIGHT);
+		shaderProgramTex.Activate();
+		rect.Draw(shaderProgramTex, 2*P_SCR_WIDTH, 2 * P_SCR_HEIGHT);
 
 		glfwSwapBuffers(phasespaceWindow);
 
@@ -617,8 +627,8 @@ void HelpMarker(const char* desc)
 	}
 }
 
-void refreshPhasespace(SymplecticBilliardSystem billiard , int n_iter, Shader shaderprogramSymplectic, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
-	int grid = 10;
+void refreshPhasespace(SymplecticBilliardSystem billiard , int &n_iter, Shader shaderprogramSymplectic, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
+	int grid = 1;
 #ifdef __APPLE__
 	int blockWidth = 2*SCR_WIDTH/grid;
 	int blockHeight = 2*SCR_HEIGHT/grid;
@@ -643,11 +653,11 @@ void refreshPhasespace(SymplecticBilliardSystem billiard , int n_iter, Shader sh
 			shaderprogramSymplectic.Activate();
 			// glUniform1f(glGetUniformLocation(shaderprogramSymplectic.ID, "width"), 2*SCR_WIDTH);
 			// glUniform1f(glGetUniformLocation(shaderprogramSymplectic.ID, "height"), 2*SCR_HEIGHT);
-			// shaderprogram.setUniform(billiard.polygon1.vertexData, "VERTICES", numberOfDistinctVertices);
-			// shaderprogram.setUniform(n_iter, "ITERATIONS");
-			// shaderprogram.setUniform(numberOfDistinctVertices, "N");
-			// shaderprogramSymplectic.setUniform(camera.Zoom,"zoom");
-			// shaderprogram.setUniform(camera.Position, "cameraPos");
+			shaderprogramSymplectic.setUniform(billiard.polygon0.vertexData, "VERTICESZERO", billiard.polygon0.directions_d.size());
+			shaderprogramSymplectic.setUniform(billiard.polygon1.vertexData, "VERTICESONE", billiard.polygon1.directions_d.size());
+			shaderprogramSymplectic.setUniform(n_iter, "ITERATIONS");
+			shaderprogramSymplectic.setUniform(float(P_SCR_WIDTH),"width");
+			shaderprogramSymplectic.setUniform(float(P_SCR_HEIGHT), "height");
 
 
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

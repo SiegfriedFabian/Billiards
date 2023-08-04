@@ -570,7 +570,7 @@ double firstIntersection(Poly& polygon, vec2_d p, vec2_d dir) {
 			res = double(i) + t.y;
 		}
 	}
-	return res; // Returns the distance from p, i.e. the intersection is at p + minDist*dir
+	return res; // Returns the intersection point parametrized by edges
 }
 
 vec2_d projectOntoLineClamped(const vec2_d &pos, const Line &line)

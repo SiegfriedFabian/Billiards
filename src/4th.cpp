@@ -35,10 +35,10 @@ vec2_d 		mouse;
 int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
 inline Camera camera(SCR_WIDTH, SCR_HEIGHT, vec2(0.0f, 0.0f));
-int n_iter = 100;
+int n_iter {100};
 // settings
 
-static int code = 4;
+static int code {4};
 
 // const char* vertexShaderSource = R"(
 // #version 330 core
@@ -178,15 +178,15 @@ int main()
 	//---------------------------------------- BEGIN Control Variables ----------------------------------------//
 	//---------------------------------------------------------------------------------------------------------//
 
-	int nRegular = 3; // variable to define how many edges the regular Polygon should have
-	bool drawscreen = true;
-	bool show_grid = 1;
-	bool snapToGrid = false;
-	bool snapToRuler = false;
-	bool clearPolygon = false;
-	bool centerPolygon = false;
-	bool showStyleEditor = false;
-	bool startDynamicalSystem = true;
+	int nRegular {3}; // variable to define how many edges the regular Polygon should have
+	bool drawscreen {true};
+	bool show_grid {1};
+	bool snapToGrid {false};
+	bool snapToRuler {false};
+	bool clearPolygon {false};
+	bool centerPolygon {false};
+	bool showStyleEditor {false};
+	bool startDynamicalSystem {true};
 
 	// Style variable 
 	//double rawMouseX, rawMouseY;
@@ -608,7 +608,6 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			// Clean the back buffer and assign the new color to it
 			glClear(GL_COLOR_BUFFER_BIT);
 			// Tell OpenGL which Shader Program we want to use
-
 			shaderprogramTex.Activate();
 			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT);
 					// Swap the back buffer with the front buffer

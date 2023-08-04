@@ -70,6 +70,11 @@ public:
 	void clearpolygon1();
 	void clearPolygons();
 	void resetTrajectories();
+
+
+	// Examples
+
+	void makeQuads();
 };
 
 vec2_d SymplecticBilliardMap(Poly polygon0, double t0, Poly polygon1, double t1, bool param_edge_ratio); 
