@@ -586,8 +586,13 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			glViewport(i*blockWidth, j*blockHeight, blockWidth, blockHeight);
 
 			shaderprogram.Activate();
+#if __APPLE__
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
+#else
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 0.5*SCR_WIDTH);
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 0.5*SCR_HEIGHT);
+#endif
 			shaderprogram.setUniform(billiard.polygon.vertexData, "VERTICES", numberOfDistinctVertices);
 			shaderprogram.setUniform(n_iter, "ITERATIONS");
 			shaderprogram.setUniform(numberOfDistinctVertices, "N");
