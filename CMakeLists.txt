@@ -20,3 +20,20 @@ link_libraries(glfw ${GL_LIBRARY} glad imgui)
 add_executable(SymplecticBilliards src/symplectic.cpp src/shaderClass.cpp src/shape.cpp src/SymplecticBilliard.cpp)
 add_executable(4th src/4th.cpp src/shaderClass.cpp src/shape.cpp src/Trajectory.cpp src/FourthBilliard.cpp)
 #add_executable(euclidean src/euclid.cpp src/shaderClass.cpp src/shape.cpp src/Trajectory.cpp src/EuclideanBilliard.cpp)
+
+# add folder for shaders next to executable
+add_custom_command(TARGET 4th POST_BUILD 
+                    COMMAND ${CMAKE_COMMAND} -E make_directory
+                    "$<TARGET_FILE_DIR:4th>/shaders")
+
+# Copy shader files for 4th into 'shader' folder
+file(GLOB SHADER_FILES
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.vert"
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.frag")
+
+foreach(SHADER ${SHADER_FILES})
+    get_filename_component(SHADER_NAME ${SHADER} NAME)
+    add_custom_command(TARGET 4th POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy
+                       ${SHADER} "$<TARGET_FILE_DIR:4th>/shaders/${SHADER_NAME}")
+endforeach(SHADER)

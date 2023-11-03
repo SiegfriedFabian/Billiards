@@ -70,18 +70,18 @@ static int code {4};
 // 	FragColor = vec4(color, 1.0);
 // })";
 
-const char* fileVertexFourth = "../src/fourth.vert";
-const char* fileFragmentFourth = "../src/fourth.frag";
+const char* fileVertexFourth = "shaders/fourth.vert";
+const char* fileFragmentFourth = "shaders/fourth.frag";
 const std::string vertexShaderFourth = get_file_contents(fileVertexFourth);
 const std::string fragmentShaderFourth = get_file_contents(fileFragmentFourth);
 
-const char* fileVertexShaderTex = "../src/loadTexture.vert";
-const char* fileFragmentShaderTex = "../src/loadTexture.frag";
+const char* fileVertexShaderTex = "shaders/loadTexture.vert";
+const char* fileFragmentShaderTex = "shaders/loadTexture.frag";
 const std::string vertexShaderSourceTex = get_file_contents(fileVertexShaderTex);
 const std::string fragmentShaderSourceTex = get_file_contents(fileFragmentShaderTex);
 
-const char* fileVertexShaderShapes = "../src/default.vert";
-const char* fileFragmentShaderShapes = "../src/default.frag";
+const char* fileVertexShaderShapes = "shaders/default.vert";
+const char* fileFragmentShaderShapes = "shaders/default.frag";
 std::string vertexShaderSourceShapes = get_file_contents(fileVertexShaderShapes);
 std::string fragmentShaderSourceShapes = get_file_contents(fileFragmentShaderShapes);
 
