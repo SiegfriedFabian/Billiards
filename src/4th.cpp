@@ -70,8 +70,8 @@ static int code {4};
 // 	FragColor = vec4(color, 1.0);
 // })";
 
-const char* fileVertexFourth = "shaders/fourth.vert";
-const char* fileFragmentFourth = "shaders/fourth.frag";
+const char* fileVertexFourth = "../../../src/fourth.vert";
+const char* fileFragmentFourth = "../../../src/fourth.frag";
 const std::string vertexShaderFourth = get_file_contents(fileVertexFourth);
 const std::string fragmentShaderFourth = get_file_contents(fileFragmentFourth);
 
@@ -590,6 +590,7 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
 #else
+			glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 0.5*SCR_WIDTH);
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 0.5*SCR_HEIGHT);
 #endif

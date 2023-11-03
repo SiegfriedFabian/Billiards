@@ -21,10 +21,18 @@ add_executable(SymplecticBilliards src/symplectic.cpp src/shaderClass.cpp src/sh
 add_executable(4th src/4th.cpp src/shaderClass.cpp src/shape.cpp src/Trajectory.cpp src/FourthBilliard.cpp)
 #add_executable(euclidean src/euclid.cpp src/shaderClass.cpp src/shape.cpp src/Trajectory.cpp src/EuclideanBilliard.cpp)
 
+# Remove and then create 'shaders' folder next to the 4th executable
+add_custom_command(TARGET 4th POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E remove_directory
+                   "$<TARGET_FILE_DIR:4th>/shaders"
+                   COMMAND ${CMAKE_COMMAND} -E make_directory
+                   "$<TARGET_FILE_DIR:4th>/shaders")
+
+
 # add folder for shaders next to executable
-add_custom_command(TARGET 4th POST_BUILD 
-                    COMMAND ${CMAKE_COMMAND} -E make_directory
-                    "$<TARGET_FILE_DIR:4th>/shaders")
+#add_custom_command(TARGET 4th POST_BUILD 
+#                    COMMAND ${CMAKE_COMMAND} -E make_directory
+#                    "$<TARGET_FILE_DIR:4th>/shaders")
 
 # Copy shader files for 4th into 'shader' folder
 file(GLOB SHADER_FILES

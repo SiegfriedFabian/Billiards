@@ -230,17 +230,19 @@ bool isFutureSingularity(in vec2 pt, in Ray[N] rays) {
 }
 
 vec2 pixelToWorld(in vec2 px) {
-    // float x_scale = height/width;
-    // return (1/zoom)*(vec2(x_scale * (aPos.x - cameraPos.x), aPos.y - cameraPos.y) );
-    return (1/zoom)* 2.0 * (px/vec2(width)
-        - vec2(0.5, 0.5 * height / width));
-
+    //float x_scale = height/width;
+    //return (1/zoom)*(vec2(x_scale * (px.x - cameraPos.x), px.y - cameraPos.y) );
+    //return (1./zoom)*2* (px/vec2(width));
+        //- vec2(0.5, 0.5 * height / width));
+    vec2 pos = (1./zoom)*2.* (px/vec2(width) - vec2(0.5, 0.5 * height / width));
+    return (width/height)*pos + cameraPos;
 }
 
 
 void main()
 {
-    vec2 pos = (width/height)*(pixelToWorld(gl_FragCoord.xy)) + cameraPos;
+    //vec2 pos = (width/height)*(pixelToWorld(gl_FragCoord.xy)) + cameraPos;
+    vec2 pos = pixelToWorld(gl_FragCoord.xy);
     // vec2 mousePos = pixelToWorld(iMouse.xy);
     // vec2 image = fourthBilliardMap(mousePos);
     
