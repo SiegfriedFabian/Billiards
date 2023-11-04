@@ -70,8 +70,8 @@ static int code {4};
 // 	FragColor = vec4(color, 1.0);
 // })";
 
-const char* fileVertexFourth = "../../../src/fourth.vert";
-const char* fileFragmentFourth = "../../../src/fourth.frag";
+const char* fileVertexFourth = "shaders/fourth.vert";
+const char* fileFragmentFourth = "shaders/fourth.frag";
 const std::string vertexShaderFourth = get_file_contents(fileVertexFourth);
 const std::string fragmentShaderFourth = get_file_contents(fileFragmentFourth);
 
