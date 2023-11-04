@@ -59,5 +59,3 @@ endforeach()
 # This ensures shaders are copied before the '4th' executable is built
 add_dependencies(4th CopyShaders)
 add_dependencies(SymplecticBilliards CopyShaders)
-
-# ... (rest of your CMakeLists.txt)
