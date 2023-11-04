@@ -54,8 +54,8 @@ int P_SCR_HEIGHT = 500;
 
 static int code = 4;
 
-const char* fileVertexFourth = "../src/fourth.vert";
-const char* fileFragmentFourth = "../src/fourth.frag";
+const char* fileVertexFourth = "shaders/fourth.vert";
+const char* fileFragmentFourth = "shaders/fourth.frag";
 const std::string vertexShaderFourth = get_file_contents(fileVertexFourth);
 const std::string fragmentShaderFourth = get_file_contents(fileFragmentFourth);
 

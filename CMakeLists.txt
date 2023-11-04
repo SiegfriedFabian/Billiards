@@ -24,6 +24,7 @@ endif()
 # Link libraries that all targets share to all targets
 link_libraries(glfw ${GL_LIBRARY} glad imgui)
 
+add_executable(SymplecticBilliards src/symplectic.cpp src/shaderClass.cpp src/shape.cpp src/SymplecticBilliard.cpp)
 add_executable(4th src/4th.cpp src/shaderClass.cpp src/shape.cpp src/Trajectory.cpp src/FourthBilliard.cpp)
 
 # Define shaders directory next to the executable '4th'
@@ -57,5 +58,6 @@ endforeach()
 # Make the '4th' target depend on the 'CopyShaders' target
 # This ensures shaders are copied before the '4th' executable is built
 add_dependencies(4th CopyShaders)
+add_dependencies(SymplecticBilliards CopyShaders)
 
 # ... (rest of your CMakeLists.txt)
