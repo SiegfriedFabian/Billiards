@@ -803,8 +803,13 @@ void Rectangle::Draw(Shader &shaderprogram, float width, float height)
 	    glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(glGetUniformLocation(shaderprogram.ID, "phasespace"), 0);
+#ifdef __APPLE__
         glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*width);
         glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*height);
+#else	// unter Windows nur 1* width und height
+		glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), width);
+		glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), height);
+#endif
 		// glUniform2fv(glGetUniformLocation(shaderprogram.ID, "VERTICES"), 6, &vertexData[0].x);
         
         glBindVertexArray(VAO);

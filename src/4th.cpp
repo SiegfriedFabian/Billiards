@@ -563,8 +563,17 @@ void HelpMarker(const char* desc)
 	}
 }
 
+// wie genau funktioniert das hier eigentlich?
+// wir übergeben VAO und fbo von einem Rectangle und kopieren dieses Rechtangle dann hierher, aber das kopierte rect hat doch gar nichts mit dem Shader zu tun oder?
+// wie wird hier festgelegt, wo auf dem Bildschirm gemalt werden soll? Weil wenn Fenster groß, dann ist Bild größer als Fenster und wenn Fenster klein, dann ist Bild kleiner als Fenster
+
+// neue Beobachtung:
+// ich weiß nicht, was ich angestellt habe, aber das Bild wird jetzt komisch zuerst in der Ecke aufgebaut und dann auf den kompletten Schirm übertragen????
+// ich kann nichtmal mit Git finden, was ich geändert habe, dass dafür sorgt? 
 void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int n_iter, GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
 	int grid = 10;
+
+	//glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);	// update SCREENSIZE, TODO TEST IF GETFRAMEBUFFERSIZE GIVES DIFFERENT RESULT IN MAC (is same for windows)
 #ifdef __APPLE__
 	int blockWidth = 2*SCR_WIDTH/grid;
 	int blockHeight = 2*SCR_HEIGHT/grid;
@@ -575,6 +584,16 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 
 	// rect.create(SCR_WIDTH, SCR_HEIGHT);
 	// int numberOfDistinctVertices = billiard.polygon.directions_d.size()+1;
+	// std::cout << "Get window Size gives: width=" << SCR_WIDTH << " and height=" << SCR_HEIGHT << std::endl;
+	//glfwGetFramebufferSize(window, &SCR_WIDTH, &SCR_HEIGHT);
+	//std::cout << "Get Framebuffer Size gives: width=" << SCR_WIDTH << " and height=" << SCR_HEIGHT << std::endl;
+	//int left;
+	//int top;
+	//int right;
+	//int bottom;
+	//glfwGetWindowFrameSize(window, &left, &top, &right, &bottom);
+	//std::cout << "Get window frame Size gives: width=" << right - left << " and height=" << top - bottom << std::endl;
+	//std::cout << "and in detail: left=" << left << ", right = " << right << " top=" << top << ", and bottom=" << bottom << std::endl;
 	for (int i = 0; i < grid; i++)
 	{
 		for (int j = 0; j < grid; j++)
@@ -590,9 +609,8 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
 #else
-			glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
-			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 0.5*SCR_WIDTH);
-			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 0.5*SCR_HEIGHT);
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), SCR_WIDTH);	// warum setzen wir die uniforms so und nicht über .setUniform wie den Rest?
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), SCR_HEIGHT);
 #endif
 			shaderprogram.setUniform(billiard.polygon.vertexData, "VERTICES", numberOfDistinctVertices);
 			shaderprogram.setUniform(n_iter, "ITERATIONS");
@@ -600,7 +618,7 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			shaderprogram.setUniform(camera.Zoom,"zoom");
 			shaderprogram.setUniform(camera.Position, "cameraPos");
 
-
+			
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 			glBindFramebuffer(GL_FRAMEBUFFER ,0);
@@ -614,8 +632,8 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			// Clean the back buffer and assign the new color to it
 			glClear(GL_COLOR_BUFFER_BIT);
 			// Tell OpenGL which Shader Program we want to use
-			shaderprogramTex.Activate();
-			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT);
+			shaderprogramTex.Activate();																	// was macht das hier?, wenn ich es auskommentiere ändert sich nichts//
+			rect.Draw(shaderprogramTex, SCR_WIDTH/2., SCR_HEIGHT/2.);										///////////////////////////////////////////////////////////////////////
 					// Swap the back buffer with the front buffer
 			glfwSwapBuffers(window);
 			// Take care of all GLFW events

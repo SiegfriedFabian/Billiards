@@ -234,8 +234,10 @@ vec2 pixelToWorld(in vec2 px) {
     //return (1/zoom)*(vec2(x_scale * (px.x - cameraPos.x), px.y - cameraPos.y) );
     //return (1./zoom)*2* (px/vec2(width));
         //- vec2(0.5, 0.5 * height / width));
-    vec2 pos = (1./zoom)*2.* (px/vec2(width) - vec2(0.5, 0.5 * height / width));
-    return (width/height)*pos + cameraPos;
+    //vec2 pos = (1./zoom)*2.* (px/vec2(width) - vec2(0.5, 0.5 * height / width));
+    //return (width/height)*pos + cameraPos;
+    vec2 pos = 1./zoom * 2./height * (px - vec2(width/2., height/2.)) + cameraPos;  // aus irgendwelchen Gründen müssen wir durch height und nicht durch width teilen. Liegt wahrscheinlich daran, wie zoom funktioniert
+    return pos;
 }
 
 
