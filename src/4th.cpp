@@ -548,6 +548,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	SCR_HEIGHT = height;
 #endif
 	glViewport(0, 0, width, height);
+	// this magically fixes resizing issues. See this link: https://stackoverflow.com/questions/70368333/framebuffer-quad-problem-on-window-resize
+	// color buffer attachment here
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+	// and depth buffer attachment
+	// glRenderBuffer(...); // keine Ahnung, was das tut oder was in die Klammer muss, aber es tut ohne das.
 }
 
 void HelpMarker(const char* desc)
@@ -570,6 +575,7 @@ void HelpMarker(const char* desc)
 // neue Beobachtung:
 // ich weiß nicht, was ich angestellt habe, aber das Bild wird jetzt komisch zuerst in der Ecke aufgebaut und dann auf den kompletten Schirm übertragen????
 // ich kann nichtmal mit Git finden, was ich geändert habe, dass dafür sorgt? 
+// Ist gefixed, Problem war, dass das untere rect.Draw mit den halbierten Werten gearbeitet hat. Jetzt hat es die richtigen
 void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int n_iter, GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
 	int grid = 10;
 
@@ -633,8 +639,12 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			glClear(GL_COLOR_BUFFER_BIT);
 			// Tell OpenGL which Shader Program we want to use
 			shaderprogramTex.Activate();																	// was macht das hier?, wenn ich es auskommentiere ändert sich nichts//
-			rect.Draw(shaderprogramTex, SCR_WIDTH/2., SCR_HEIGHT/2.);										///////////////////////////////////////////////////////////////////////
-					// Swap the back buffer with the front buffer
+#if __APPLE__
+			rect.Draw(shaderprogramTex, SCR_WIDTH/2., SCR_HEIGHT/2.);										// wir brauchen auch hier unterscheidung windows Apple
+#else
+			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT);
+#endif
+			// Swap the back buffer with the front buffer
 			glfwSwapBuffers(window);
 			// Take care of all GLFW events
 			glfwPollEvents();
