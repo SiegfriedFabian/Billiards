@@ -14,7 +14,7 @@ uniform vec2 cameraPos;
 // }
 
 const float PI = 3.141592653589793238;
-const float LINE_THICKNESS = 0.005;
+const float LINE_THICKNESS = 0.01;
 // const int ITERATIONS = 5;
 
 
@@ -236,7 +236,7 @@ vec2 pixelToWorld(in vec2 px) {
         //- vec2(0.5, 0.5 * height / width));
     //vec2 pos = (1./zoom)*2.* (px/vec2(width) - vec2(0.5, 0.5 * height / width));
     //return (width/height)*pos + cameraPos;
-    vec2 pos = 1./zoom * 2./height * (px - vec2(width/2., height/2.)) + cameraPos;  // aus irgendwelchen Gründen müssen wir durch height und nicht durch width teilen. Liegt wahrscheinlich daran, wie zoom funktioniert
+    vec2 pos = 1./zoom * 2./height * (px - vec2(width/2., height/2.)) + cameraPos;  // aus irgendwelchen Grï¿½nden mï¿½ssen wir durch height und nicht durch width teilen. Liegt wahrscheinlich daran, wie zoom funktioniert
     return pos;
 }
 

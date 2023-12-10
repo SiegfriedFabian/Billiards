@@ -36,6 +36,7 @@ int SCR_WIDTH = 1280;
 int SCR_HEIGHT = 720;
 inline Camera camera(SCR_WIDTH, SCR_HEIGHT, vec2(0.0f, 0.0f));
 int n_iter {100};
+bool resizeBool{false};
 // settings
 
 static int code {4};
@@ -120,7 +121,7 @@ int main()
 #endif
 
 	// Create a windowed mode window and its OpenGL context
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Symplectic Billiards", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, " ", NULL, NULL);
 	glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
 
 	// GLFWwindow* window_phasespace = glfwCreateWindow(pwidth, pheight, "Symplectic Billiards Phasespace", NULL, NULL);
@@ -188,6 +189,7 @@ int main()
 	bool showStyleEditor {false};
 	bool startDynamicalSystem {true};
 
+
 	// Style variable 
 	//double rawMouseX, rawMouseY;
 
@@ -254,7 +256,7 @@ int main()
 		// Sadly for visibility this had to move up here, before the GUI
 		if(show_grid){
 		grid.Draw(shaderProgramShapes);
-		ruler.Draw(shaderProgramShapes);
+		// ruler.Draw(shaderProgramShapes);
 		xAxis.Draw(shaderProgramShapes);
 		yAxis.Draw(shaderProgramShapes);
 		}
@@ -275,8 +277,9 @@ int main()
 			// Text that appears in the window
 			// Checkbox that appears in the window
 			ImGui::InputInt("Number of iterations for discontinuities: ", &n_iter);
-			if(ImGui::Button("refresh phasespace")){
+			if(ImGui::Button("refresh phasespace") || resizeBool){
                 refreshPhasespace(billiard, numberOfDistinctVertices, n_iter, rect.VAO, rect.textureFBO, shaderProgramFourth,shaderProgramTex, rect, window);
+				resizeBool = false;
             }
 			ImGui::Checkbox("Show Grid", &show_grid);
 			ImGui::Checkbox("Snap to grid", &snapToGrid); ImGui::SameLine();	// DONE currently leads to weird behaviour, since Trajectories are not reset
@@ -541,8 +544,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	// Apple somehow halves the resolution
 #ifdef __APPLE__
-	SCR_WIDTH = width / 2;
-	SCR_HEIGHT = height / 2;
+	SCR_WIDTH = std::ceil(width / 2.);
+	SCR_HEIGHT = std::ceil(height / 2.);
 #else
 	SCR_WIDTH = width;
 	SCR_HEIGHT = height;
@@ -550,6 +553,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 	// this magically fixes resizing issues. See this link: https://stackoverflow.com/questions/70368333/framebuffer-quad-problem-on-window-resize
 	// color buffer attachment here
+	resizeBool = true;
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 	// and depth buffer attachment
 	// glRenderBuffer(...); // keine Ahnung, was das tut oder was in die Klammer muss, aber es tut ohne das.
@@ -569,20 +573,20 @@ void HelpMarker(const char* desc)
 }
 
 // wie genau funktioniert das hier eigentlich?
-// wir übergeben VAO und fbo von einem Rectangle und kopieren dieses Rechtangle dann hierher, aber das kopierte rect hat doch gar nichts mit dem Shader zu tun oder?
-// wie wird hier festgelegt, wo auf dem Bildschirm gemalt werden soll? Weil wenn Fenster groß, dann ist Bild größer als Fenster und wenn Fenster klein, dann ist Bild kleiner als Fenster
+// wir ï¿½bergeben VAO und fbo von einem Rectangle und kopieren dieses Rechtangle dann hierher, aber das kopierte rect hat doch gar nichts mit dem Shader zu tun oder?
+// wie wird hier festgelegt, wo auf dem Bildschirm gemalt werden soll? Weil wenn Fenster groï¿½, dann ist Bild grï¿½ï¿½er als Fenster und wenn Fenster klein, dann ist Bild kleiner als Fenster
 
 // neue Beobachtung:
-// ich weiß nicht, was ich angestellt habe, aber das Bild wird jetzt komisch zuerst in der Ecke aufgebaut und dann auf den kompletten Schirm übertragen????
-// ich kann nichtmal mit Git finden, was ich geändert habe, dass dafür sorgt? 
+// ich weiï¿½ nicht, was ich angestellt habe, aber das Bild wird jetzt komisch zuerst in der Ecke aufgebaut und dann auf den kompletten Schirm ï¿½bertragen????
+// ich kann nichtmal mit Git finden, was ich geï¿½ndert habe, dass dafï¿½r sorgt? 
 // Ist gefixed, Problem war, dass das untere rect.Draw mit den halbierten Werten gearbeitet hat. Jetzt hat es die richtigen
 void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int n_iter, GLuint VAO, GLuint fbo, Shader shaderprogram, Shader shaderprogramTex, Rectangle rect, GLFWwindow* window){
 	int grid = 10;
 
 	//glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);	// update SCREENSIZE, TODO TEST IF GETFRAMEBUFFERSIZE GIVES DIFFERENT RESULT IN MAC (is same for windows)
 #ifdef __APPLE__
-	int blockWidth = 2*SCR_WIDTH/grid;
-	int blockHeight = 2*SCR_HEIGHT/grid;
+	int blockWidth = 2*SCR_WIDTH/grid +1;
+	int blockHeight = 2*SCR_HEIGHT/grid +1;
 #else
 	int blockWidth = SCR_WIDTH/grid;
 	int blockHeight = SCR_HEIGHT/grid;
@@ -615,7 +619,7 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), 2*SCR_WIDTH);
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), 2*SCR_HEIGHT);
 #else
-			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), SCR_WIDTH);	// warum setzen wir die uniforms so und nicht über .setUniform wie den Rest?
+			glUniform1f(glGetUniformLocation(shaderprogram.ID, "width"), SCR_WIDTH);	// warum setzen wir die uniforms so und nicht ï¿½ber .setUniform wie den Rest?
 			glUniform1f(glGetUniformLocation(shaderprogram.ID, "height"), SCR_HEIGHT);
 #endif
 			shaderprogram.setUniform(billiard.polygon.vertexData, "VERTICES", numberOfDistinctVertices);
@@ -638,9 +642,9 @@ void refreshPhasespace(FourthBilliard billiard,int numberOfDistinctVertices, int
 			// Clean the back buffer and assign the new color to it
 			glClear(GL_COLOR_BUFFER_BIT);
 			// Tell OpenGL which Shader Program we want to use
-			shaderprogramTex.Activate();																	// was macht das hier?, wenn ich es auskommentiere ändert sich nichts//
+			shaderprogramTex.Activate();																	// was macht das hier?, wenn ich es auskommentiere ï¿½ndert sich nichts//
 #if __APPLE__
-			rect.Draw(shaderprogramTex, SCR_WIDTH/2., SCR_HEIGHT/2.);										// wir brauchen auch hier unterscheidung windows Apple
+			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT);										// wir brauchen auch hier unterscheidung windows Apple
 #else
 			rect.Draw(shaderprogramTex, SCR_WIDTH, SCR_HEIGHT);
 #endif
